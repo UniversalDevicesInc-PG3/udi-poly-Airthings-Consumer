@@ -5,4 +5,3 @@ logs/*
 zip_exclude.lst
 *.zip
 udi_interface*/*
-pyharmony/*

@@ -1,5 +1,5 @@
 
-NAME = ExampleJimBo
+NAME = Airthings-Consumer
 XML_FILES = profile/*/*.xml 
 
 # sudo apt-get install libxml2-utils libxml2-dev

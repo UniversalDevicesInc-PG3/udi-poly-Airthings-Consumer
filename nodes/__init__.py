@@ -1,6 +1,6 @@
 
 """ Node classes used by the Wireless Sensor Tags Node Server. """
 
-from .Tag         import Tag
-from .TagManager  import TagManager
+#from .Sensor      import Sensor
+#from .Hub         import Hub
 from .Controller  import Controller
