@@ -1,4 +1,4 @@
-# Polyglot V2 ELK Nodeserver
+# Polyglot V3 Airthings Nodeserver
 
 ## Important Notices
 
@@ -6,7 +6,7 @@ I am not responsible for any issues related to this nodeserver.
 
 ## Help
 
-If you have any issues are questions you can ask on [PG3 AirThings SubForum](https://forum.universal-devices.com/forum/309-airthings/) or report an issue at [PG3 ELK Github issues](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues).
+If you have any issues are questions you can ask on [PG3 AirThings SubForum](https://forum.universal-devices.com/forum/309-airthings/) or report an issue at [PG3 Airthings Consumer Github issues](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues).
 
 ## Installation
 
@@ -14,17 +14,15 @@ Install from the Polyglot store.
 
 ### Configuration
 
-Open the Configuration Page for the Nodeserver in the Polyglot UI and view the [Configuration Help](/POLYGLOT_CONFIG.md) available on that page.
+Open the Configuration Page for the Nodeserver in the Polyglot UI and view the [Configuration Help](/CONFIG.md) available on that page.
 
 ## Requirements
 
-TBD
+This supports consumer devices from <a href="https://www.airthings.com/">Airthings</a>.  Currently it has only been tested with a Wave Plus device, but is currently built in a generic way to support any sensor.  But, if that sensor doesn't support everything the Wave Plus does then you will see those drivers with empty values.  I will work on resolving this withough requiring customizing the interface for each device.
 
 ## Using this Node Server
 
 ### General notes
-
-TBD
 
 ### Nodes
 
@@ -33,10 +31,14 @@ TBD
 This has the following status:
 - NodeServer Online
   - Nodeserver up and running
+- Sensor Count
 
 #### Sensor Node
 
 TBD
+
+https://www.airthings.com/what-is-voc
+https://help.airthings.com/en/collections/2683690-understanding-radon-and-iaq#vocs
 
 ## Using the Nodeserver
 
@@ -70,5 +72,6 @@ ${sys.node.n004_zone_2.name} ${sys.node.n004_zone_2.status}
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
-- 0.0.0: 06/063033
-  - Started
+- 0.0.1: 07/03/2022
+  - Initial release
+

@@ -2,9 +2,9 @@
 from udi_interface import Node,LOGGER,Custom,LOG_HANDLER
 import sys,time,logging,json
 from threading import Thread,Lock
+from pgSession import pgSession
 
-from nodes import TagManager
-from node_functions import get_server_data,get_valid_node_name,get_profile_info
+from nodes import Sensor
 
 class Controller(Node):
 
@@ -14,6 +14,8 @@ class Controller(Node):
         # These start in threads cause they take a while
         self.ready = False
         self.first_run = True
+        self.token = False
+        self.sensors = {}
         self.queue_lock = Lock() # Lock for syncronizing acress threads
         self.n_queue = []
         self.Notices         = Custom(poly, 'notices')
@@ -34,7 +36,8 @@ class Controller(Node):
         poly.subscribe(poly.CONFIG,            self.handler_config)
         poly.subscribe(poly.CONFIGDONE,        self.handler_config_done)
         poly.subscribe(poly.CUSTOMNS,          self.handler_nsdata)
-        poly.subscribe(poly.ADDNODEDONE,       self.node_dequeue)
+        poly.subscribe(poly.OAUTH,             self.handler_oauth)
+        poly.subscribe(poly.ADDNODEDONE,       self.node_queue)
         self.client_id              = None
         self.client_secret          = None
         self.handler_start_st       = None
@@ -51,50 +54,52 @@ class Controller(Node):
     will return before the node is fully created. Using this, we can wait
     until it is fully created before we try to use it.
     '''
-    def node_dequeue(self, data):
-        LOGGER.debug(f'locking: data={data}')
-        self.queue_lock.acquire()
-        if self.n_queue.count(data['address']) > 0:
-            self.n_queue.remove(data['address'])
-        self.queue_lock.release()
-        LOGGER.debug('lock released')
+    def node_queue(self, data):
+        self.n_queue.append(data['address'])
+        # Now that node is done, do what is necessary
+        if (data['address'] == self.address):
+            self.add_node_done()
+
+    def wait_for_node_done(self):
+        while len(self.n_queue) == 0:
+            time.sleep(0.1)
+        self.n_queue.pop()
 
     def add_node(self,node):
-        LOGGER.debug(f'adding node node={node.address} {node.name}')
-        self.queue_lock.acquire()
-        ret = False
-
-        # See if it's already being added or exists
-        if self.n_queue.count(node.address) > 0:
-            LOGGER.error(f"Already waiting for node {node.address} name={node.name} to be added.")
-            self.queue_lock.release()
-        else:
-            ret = self.poly.getNode(node.address)
-            if ret is not None:
-                LOGGER.error(f"Node {node.address} name={node.name} already exists.")
-                self.queue_lock.release()
-            else:
-                # Queue it up and add it
-                self.n_queue.append(node.address)
-                self.queue_lock.release()
-                ret = self.poly.addNode(node)
-                LOGGER.debug(f'got {ret}')
-                if ret is None:
-                    self.node_dequeue({'address': node.address})
-                    LOGGER.error(r'Failed to add {node.address} name={node.name}')
+        # See if we need to check for node name changes where ELK is the source
+        address = node.address
+        cname = self.poly.getNodeNameFromDb(address)
+        if cname is not None:
+            LOGGER.debug(f"node {address} Requested: '{node.name}' Current: '{cname}'")
+            # Check that the name matches
+            if node.name != cname:
+                if 'change_node_names' in self.Params and self.Params['change_node_names'] == 'true':
+                    LOGGER.warning(f"Existing node name '{cname}' for {address} does not match requested name '{node.name}', changing to match")
+                    self.poly.renameNode(address,node.name)
+                elif 'change_node_names' in self.Params:
+                    LOGGER.warning(f"Existing node name '{cname}' for {address} does not match requested name '{node.name}', NOT changing to match, set change_node_names=true to enable")
+                    # Change it to existing name to avoid addNode error
+                    node.name = cname
                 else:
-                    cnt = 0
-                    while self.n_queue.count(node.address) > 0:
-                        cnt += 1
-                       # Warn every 5 seconds, and die after 60?
-                        if cnt % 50 == 0:
-                            LOGGER.warning(f"Waiting for {node.address} add to complete. Queued for {cnt / 10} seconds...")
-                        if cnt > 6000:
-                            LOGGER.error(f"TIMEOUT waiting for {node.address} add to complete...")
-                            return False
-                        time.sleep(0.1)
-        LOGGER.debug(f'returning {ret}')
-        return ret
+                    LOGGER.warning(f"Existing node name '{cname}' for {address} does not match requested name '{node.name}', NOT changing to match")
+                    # Change it to existing name to avoid addNode error
+                    node.name = cname
+        LOGGER.debug(f"Adding: {node.name}")
+        self.poly.addNode(node)
+        self.wait_for_node_done()
+        gnode = self.poly.getNode(address)
+        if gnode is None:
+            LOGGER.error('Failed to add node address')
+        return node
+
+    def add_node_done(self):
+        LOGGER.debug("start")
+        # https://accounts-api.airthings.com/v1/token
+        self.start_session()
+        self.authorize()
+        self.discover()
+        self.first_run = False
+        LOGGER.debug("done")
 
     def handler_start(self):
         LOGGER.info('enter')
@@ -102,33 +107,19 @@ class Controller(Node):
         # Start a heartbeat right away
         self.hb = 0
         self.heartbeat()
-
-        LOGGER.info(f"Started Example JimBo NodeServer {self.poly.serverdata['version']}")
+        LOGGER.info(f"Started Airthings-Consumer NodeServer {self.poly.serverdata['version']}")
         cnt = 10
         while (self.handler_params_st is None or self.handler_config_done_st is None
             or self.handler_nsdata_st is None or self.handler_data_st is None) and cnt > 0:
             LOGGER.warning(f'Waiting for all to be loaded config={self.handler_config_done_st} params={self.handler_params_st} data={self.handler_data_st} nsdata={self.handler_nsdata_st}... cnt={cnt}')
             time.sleep(1)
             cnt -= 1
-        #
-        # Always need to start the REST server
-        #
-        #self.rest_start()
-        #
-        # All good?
-        #
-        #if self.wtServer is False:
-        #    self.Notices['auth'] = f"REST Server ({self.wtServer}) not running. check Log for ERROR"
-        #elif self.client_id is None:
-        #    self.Notices['auth'] = "Unable to authorize, no client id returned in Node Server Data.  Check Log for ERROR"
-        #elif self.oauth2_code is False:
-        #    self.auth_url      = "https://www.mytaglist.com/oauth2/authorize.aspx?client_id={0}".format(self.client_id)
-        #    self.Notices['auth'] = 'Click <a target="_blank" href="{0}&redirect_uri={1}/code">Authorize</a> to link your CAO Wireless Sensor Tags account'.format(self.auth_url,self.wtServer.url)
-        #else:
-        #    self.Notices.delete('auth')
-
-        #self.add_existing_tag_managers()
-        self.query()
+        self.set_auth_st(False)
+        configurationHelp = './CONFIG.md'
+        if os.path.isfile(configurationHelp):
+            cfgdoc = markdown2.markdown_path(configurationHelp)
+            self.poly.setCustomParamsDoc(cfgdoc)
+        self.poly.updateProfile()
         self.ready = True
         LOGGER.info('done')
 
@@ -149,27 +140,11 @@ class Controller(Node):
             self.shortPoll()
 
     def shortPoll(self):
-        if self.discover_thread is not None:
-            if self.discover_thread.isAlive():
-                LOGGER.debug('discover thread still running...')
-            else:
-                LOGGER.debug('discover thread is done...')
-                self.discover_thread = None
-        # Call short poll on the tags managers
         for node in self.poly.nodes():
-            if node.id == 'wTagManager':
+            if node.address != self.address:
                 node.shortPoll()
 
     def longPoll(self):
-        LOGGER.debug('ready={}'.format(self.ready))
-        if not self.ready: return False
-        # For now just pinging the server to make sure it's alive
-        self.is_signed_in()
-        if not self.comm: return self.comm
-        # Call long poll on the tags managers
-        for node in self.poly.nodes():
-            if node.id == 'wTagManager':
-                node.longPoll()
         self.heartbeat()
 
     def heartbeat(self):
@@ -185,9 +160,107 @@ class Controller(Node):
         if not self.authorized('query') : return False
         self.is_signed_in()
         self.reportDrivers();
-        # Don't do this on initial startup!
-        for node in self.poly.nodes():
-            node.reportDrivers()
+
+    # *****************************************************************************
+    #
+    # Session methods
+    #
+    def start_session(self):
+        LOGGER.debug("start")
+        self.session = pgSession(self,LOGGER,'https://accounts-api.airthings.com',debug_level=1)
+        LOGGER.debug("done")
+
+    def api_get(self,path,params={}):
+        res = self.session.get(
+            path,params,
+            auth='{} {}'.format(self.token_type,self.token),
+            url="https://ext-api.airthings.com/v1/",
+        )
+        if res is False:
+            return res
+        if res['data'] is False:
+            return False
+        LOGGER.debug('res={}'.format(res))
+        if not 'status' in res['data']:
+            return res
+        res_st_code = int(res['data']['status']['code'])
+        if res_st_code == 0:
+            return res
+        LOGGER.error('Checking Bad Status Code {} for {}'.format(res_st_code,res))
+        if res_st_code == 14:
+            LOGGER.error( 'Token has expired, will refresh')
+            # TODO: Should this be a loop instead ?
+            if self._getRefresh() is True:
+                return self.session.get(path,{ 'json': json.dumps(data) },
+                                    auth='{} {}'.format(self.tokenData['token_type'], self.tokenData['access_token']))
+        elif res_st_code == 16:
+            self._reAuth("session_get: Token deauthorized by user: {}".format(res))
+        return False
+
+    def authorize(self):
+        self.Notices.delete('client_id')
+        st = True
+        if self.client_id is None:
+            msg = f"Can not authorize, client_id={self.client_id}"
+            LOGGER.error(msg)
+            self.Notices['client_id'] = msg
+            st = False
+        self.Notices.delete('client_secret')
+        if self.client_secret is None:
+            msg = f"Can not authorize, client_secret={self.client_secret}"
+            LOGGER.error(msg)
+            self.Notices['client_secret'] = msg
+            st = False
+        if st is False:
+            return st
+        st = self.session.post('v1/token',
+            {
+                "grant_type":"client_credentials",
+                "client_id":self.client_id,
+                "client_secret":self.client_secret,
+                "scope": ["read:device:current_values"]
+            }
+        )
+        if 'code' in st and st['code'] == 200:
+            LOGGER.info("Authorization Successful")
+            self.set_auth_st(True)
+            self.token = st['data']['access_token']
+            self.token_type = st['data']['token_type']
+            self.token_expires = st['data']['expires_in']
+        LOGGER.debug("done")
+
+    def devices(self):
+        LOGGER.debug("start")
+        st = self.api_get('devices',{})
+        if 'code' in st and st['code'] == 200:
+            return st['data']['devices']
+        LOGGER.debug("done")
+
+    # *****************************************************************************
+
+    def discover(self, *args, **kwargs):
+        LOGGER.debug("start")
+        nkey = 'discover'
+        self.Notices.delete(nkey)
+        if self.handler_params_st is not True:
+            msg = f"Can not discover until Params are defined. (st={self.handler_params_st})"
+            LOGGER.error(msg)
+            self.Notices[nkey] = msg
+        if not self.authorized:
+            LOGGER.warning("Can't discover, not authorized")
+            return
+        self.set_sensors(0)
+        for device in self.devices():
+            st = self.add_device(device)
+        return
+
+    def add_device(self,device):
+        LOGGER.debug(f"start: {device}")
+        if device['deviceType'] != "HUB":
+            if self.add_node(Sensor(self, device['id'], self.poly.getValidName(device['segment']['name']), self.units, device=device)):
+                self.sensors[device['id']] = Node
+                self.incr_sensors()
+        LOGGER.debug(f"done")
 
     def add_existing_tag_managers(self):
         """
@@ -203,97 +276,96 @@ class Controller(Node):
             else:
                 LOGGER.error('node has no {0}? node={1}'.format(nodedef,node))
 
-    def discover(self, *args, **kwargs):
-        """
-        Example
-        Do discovery here. Does not have to be called discovery. Called from example
-        controller start method and from DISCOVER command recieved from ISY as an exmaple.
-        """
-        if not self.authorized('discover') : return False
-        self.set_auth(True)
-        mgd = self.get_tag_managers()
-        if not 'macs' in self.Data:
-            self.Data['macs'] = dict()
-        if mgd['st']:
-            for mgr in mgd['result']:
-                LOGGER.debug("TagManager={0}".format(mgr))
-                address = mgr['mac'].lower()
-                node = self.get_node(address)
-                if node is None:
-                    self.add_node(TagManager(self, address, mgr['name'], mgr['mac'], do_discover=True))
-                else:
-                    LOGGER.info('Running discover on {0}'.format(node))
-                    node.discover(thread=False)
-
     def delete(self):
         LOGGER.info('Oh God I\'m being deleted. Nooooooooooooooooooooooooooooooooooooooooo.')
 
     def handler_stop(self):
         LOGGER.debug('NodeServer stopped.')
 
-
     #def handler_data(self,data):
     #    LOGGER.debug('enter: Loading data')
     #    self.Data.load(data)
     #    LOGGER.debug(f'Data={self.Data}')
+
     def handler_nsdata(self, key, data):
         LOGGER.debug(f"key={key} data={data}")
+        self.handler_nsdata_st = True
+        return
 
-        # Temporary, should be fixed in next version of PG3
-        if key is None or data is None:
-                msg = f"No NSDATA Returned by Polyglot key={key} data={data}"
-                LOGGER.error(msg)
-                self.Notices['nsdata'] = msg
+        self.Notices.delete(key)
+
+        if key == 'oauth':
+            try:
+                self.client_id     = data['client_id']
+                self.client_secret = data['client_secret']
+            except:
+                LOGGER.error(f'failed to parse {key} data={data}',exc_info=True)
                 self.handler_nsdata_st = False
                 return
 
-        if 'nsdata' in key:
-            LOGGER.info('Got nsdata update {}'.format(data))
-
-        self.Notices.delete('nsdata')
-        try:
-            #jdata = json.loads(data)
-            self.client_id     = data['client_id']
-            self.client_secret = data['client_secret']
-        except:
-            LOGGER.error(f'failed to parse nsdata={data}',exc_info=True)
-            self.handler_nsdata_st = False
-            return
         self.handler_nsdata_st = True
+
+    def handler_oauth(self, data):
+        LOGGER.debug(f"key={key} data={data}")
+        return
+        self.Notices.delete('oauth')
+
 
     def handler_data(self,data):
         LOGGER.debug(f'enter: Loading data {data}')
         self.Data.load(data)
         self.handler_data_st = True
 
-    def handler_params(self,params):
-        LOGGER.debug(f'enter: Loading params {params}')
-        self.Params.load(params)
-        self.poly.Notices.clear()
-        """
-        Check all user params are available and valid
-        """
-        # Assume it's good unless it's not
+    def handler_params(self,data):
+        LOGGER.debug("Enter data={}".format(data))
+        #self.Notices.clear()
+
+        # Our defaults, make sure the exist in case user deletes one
+        params = {
+            'units': 'US',
+            'client_id': '',
+            'client_secret': "",
+            #'change_node_names': "false"
+        }
+        if data is not None:
+            # Load what we have
+           self.Params.load(data)
+
+        # Assume we are good unless something bad is found
         st = True
- 
-        LOGGER.debug(f'oauth2_code={self.oauth2_code}')
 
-        # If it's a config change, then need to restart the REST server
-        # because the auth2_code must have changed.
-        if not self.first_run:
-            self.discover()
+        # Make sure all the params exist.
+        for param in params:
+            if data is None or not param in data:
+                LOGGER.error(f'Add back missing param {param}')
+                self.Params[param] = params[param]
+                # Can't do anything else because we will be called again due to param change
+                return
 
-        self.first_run = True
+        # Make sure they all have a value that is not the default
+        for param in params:
+            if data[param] == "" or (data[param] == params[param] and param != 'units' and param != "change_node_names"):
+                msg = f'Please define {param}'
+                LOGGER.error(msg)
+                self.Notices[param] = msg
+                st = False
+            else:
+                self.Notices.delete(param)
+
+        self.client_id     = self.Params['client_id']
+        self.client_secret = self.Params['client_secret']
+        self.units = self.Params['units'].upper()
+        if self.units == "US" or self.units == "METRIC":
+            self.Notices.delete('unitsv')
+        else:
+            msg = f"Units must be 'US' or 'METRIC', assuming 'US'"
+            LOGGER.error(msg)
+            self.Notices['unitsv'] = msg
 
         self.handler_params_st = st
-        LOGGER.debug(f'exit: st={st}')
-
-    def set_url_config(self):
-        # TODO: Should loop over tag managers, and call set_url_config on the tag manager
-        for node in self.poly.nodes():
-            LOGGER.debug("id={}".format(node.id))
-            if not (node.id == 'wtController' or node.id == 'wTagManager'):
-                node.set_url_config()
+        if not self.first_run:
+            self.discover()
+        LOGGER.debug(f'exit: first_run={self.first_run} st={self.handler_params_st}')
 
     def handler_log_level(self,level):
         LOGGER.info(f'enter: level={level}')
@@ -312,8 +384,19 @@ class Controller(Node):
     """
     Set Functions
     """
-    def set_managers(self,val):
-        self.setDriver('GV1', val)
+    def set_auth_st(self,val):
+        self.authorized = val
+        ival = 1 if val else 0
+        LOGGER.debug("{}:set_auth_st: {}={}".format(self.address,val,ival))
+        self.setDriver('GV1',ival,uom=2)
+
+    def set_sensors(self,val):
+        self.num_sensors = val
+        self.setDriver('GV2', val)
+
+    def incr_sensors(self):
+        self.num_sensors += 1
+        self.setDriver('GV2', self.num_sensors)
 
     """
     Command Functions
@@ -327,13 +410,14 @@ class Controller(Node):
     """
     Node Definitions
     """
-    id = 'exController'
+    id = 'Controller'
     commands = {
-        'SET_MANAGERS': cmd_set_managers,
         'QUERY': query,
-        'DISCOVER': discover,
+        'QUERY_ALL': query,
+        'UPDATE_PROFILE': query,
     }
     drivers = [
-        {'driver': 'ST',  'value': 1, 'uom': 56},
-        {'driver': 'GV1', 'value': 0, 'uom': 56},  # auth: Managers
+        {'driver': 'ST',  'value': 1, 'uom': 25},   # connection status
+        {'driver': 'GV1', 'value': 0, 'uom': 2},    # authorized
+        {'driver': 'GV2', 'value': 0, 'uom': 56},   # sensors
     ]

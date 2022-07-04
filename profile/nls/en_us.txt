@@ -1,0 +1,25 @@
+
+# controller
+ND-Controller-NAME = Airthings Controller
+CMD-ctl-QUERY-NAME = Query
+CMD-ctl-QUERY_ALL-NAME = Query All
+ST-ctl-ST-NAME = NodeServer Status
+ST-ctl-GV1-NAME = Authorized
+ST-ctl-GV2-NAME = Sensors
+
+# Controller Status
+CST-0 = Disconnected
+CST-1 = Connected
+CST-2 = Failed
+
+#
+# Sensor Host
+#
+ND-Sensor-NAME = Airthings Sensor
+ST-Sensor-ST-NAME = Active
+ST-sensor-GV1-NAME = Radon
+ST-sensor-GV2-NAME = Time
+ST-sensor-GV3-NAME = RSSI
+ST-sensor-GV4-NAME = VOC
+
+

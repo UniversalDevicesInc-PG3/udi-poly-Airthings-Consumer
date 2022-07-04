@@ -16,7 +16,7 @@ if __name__ == "__main__":
     try:
         polyglot = Interface([Controller])
         polyglot.start()
-        control = Controller(polyglot, 'excontroller', 'excontroller', 'WirelessTagsController')
+        control = Controller(polyglot, 'controller', 'controller', 'Airthings Controller')
         polyglot.runForever()
     except (KeyboardInterrupt, SystemExit):
         polyglot.stop()

@@ -1,0 +1,46 @@
+<nodeDefs>
+    <nodeDef id="Controller" nls="ctl">
+        <editors />
+        <sts>
+			<st id="ST" editor="cst" />
+            <st id="GV1" editor="bool" /> <!-- Authorized -->
+            <st id="GV2" editor="I_CNT" /> <!-- Sensors -->
+		</sts>
+        <cmds>
+            <sends>
+              <!-- These are for our heartbeat -->
+              <cmd id="DON" />
+              <cmd id="DOF" />
+            </sends>
+            <accepts>
+              <cmd id="QUERY" />
+              <cmd id="QUERY_ALL" />
+            </accepts>
+        </cmds>
+    </nodeDef>
+
+  <!-- Tag 12 F -->
+  <nodeDef id="Sensor" nls="sensor">
+    <editors/>
+    <sts>
+      <st id="ST" editor="BOOL"/> <!-- Status, online? x -->
+      <st id="BATLVL" editor="I_PCT"/> <!-- battery -->
+      <st id="CO2LVL" editor="I_CO2"/> <!-- co2 -->
+      <st id="CLIHUM" editor="I_HUM"/> <!-- humidity -->
+      <st id="BARPRES" editor="I_MBAR"/> <!-- pressure -->
+      <st id="GV1" editor="I_FLOAT"/> <!-- radon -->
+      <st id="GV3" editor="I_INT"/> <!-- rssi -->
+      <st id="CLITEMP" editor="I_TEMP"/> <!-- temperature ? -->
+      <st id="GV2" editor="I_INT"/> <!-- time -->
+      <st id="GV4" editor="I_VOC"/> <!-- voc -->
+      <st id="VOCLVL" editor="I_VOC_LVL"/> <!-- voc levels -->
+    </sts>
+    <cmds>
+      <sends/>
+      <accepts>
+        <cmd id="QUERY"/>
+      </accepts>
+    </cmds>
+  </nodeDef>
+
+</nodeDefs>

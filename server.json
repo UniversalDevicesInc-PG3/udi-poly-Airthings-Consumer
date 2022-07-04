@@ -1,27 +1,24 @@
 {
-    "name": "WirelessTag",
-    "docs": "https://github.com/jimboca/udi-WirelessSensorTags-poly",
+    "name": "Airthings-C",
+    "docs": "https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer",
     "type": "python3",
-    "executable": "wirelesstags-poly.py",
+    "executable": "airthings.py",
     "install": "install.sh",
     "description": "Node Server for CAO Gadgets Wireless Sensor Tags www.wirelesstag.net",
     "notice": "No disclaimer here",
-    "shortPoll": "60",
+    "shortPoll": "30",
     "longPoll": "600",
 	"logLevel": "DEBUG",
     "discover": true,
-    "profile_version": "3.0.2",
-	"customParams": {
-		"oauth2_code": false
-	},
+    "profile_version": "0",
     "credits": [
         {
             "title": "udi-WirelessSensorTags-poly: A NodeServer for CAO Gadgets Wireless Sensor Tags",
             "author": "JimBoCA",
-            "version": "3.0.12",
-            "date": "February 27, 2018",
-            "source": "https://github.com/jimboca/udi-wirelesstag-poly",
-            "license": "https://raw.githubusercontent.com/jimboca/udi-wirelesstag-poly/master/LICENSE"
+            "version": "0.0.1",
+            "date": "July 3, 2022",
+            "source": "https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer",
+            "license": "https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/master/LICENSE"
         }
     ]
 }
