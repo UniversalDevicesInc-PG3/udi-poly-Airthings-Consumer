@@ -6,30 +6,32 @@
     <editor id="cst">
       <range uom="25" subset="0,1,2" nls="CST"/>
     </editor>
-	  <editor id="I_TEMP">
-		  <range uom="4" min="-50" max="75" step="0.5" prec="1" />
-		  <range uom="17" min="-50" max="150" step="1" prec="1" />
-	  </editor>
+	<editor id="I_TEMP">
+		<range uom="4" min="-50" max="75" step="0.5" prec="1" />
+		<range uom="17" min="-50" max="150" step="1" prec="1" />
+	</editor>
   	<editor id="I_HUM">
-		  <range uom="22" min="0" max="100" step="0.1" prec="1" />
-	  </editor>
+		<range uom="22" min="0" max="100" step="0.1" prec="1" />
+	</editor>
   	<editor id="I_PCT">
-		  <range uom="51" min="0" max="100" step="1" prec="1" />
-	  </editor>
+		<range uom="51" min="0" max="100" step="1" prec="1" />
+	</editor>
   	<editor id="I_FLOAT">
-		  <range uom="56" step="0.1" prec="1" />
-	  </editor>
+		<range uom="56" step="0.1" prec="1" />
+	</editor>
   	<editor id="I_CO2">
-		  <range uom="54" min="0" max="1000000" step="0.1" prec="1" />
+		<range uom="54" min="0" max="1000000" step="0.1" prec="1" />
+	</editor>
   	<editor id="I_VOC">
-		  <range uom="56" min="0" max="1000000" step="0.1" prec="1" />
-	  </editor>
+		<range uom="56" min="0" max="1000000" step="0.1" prec="1" />
+	</editor>
   	<editor id="I_VOC_LVL">
-		  <range uom="96" subset="1-4"/>
-	  </editor>
+		<range uom="96" subset="1-4"/>
+	</editor>
   	<editor id="I_MBAR">
 		  <range uom="56" min="0" max="1000000" step="0.1" prec="1" />
-	  </editor id="I_INT">
-    	<range uom="56" min="-1000000" max="1000000" prec="1" />
-	  </editor>
+	</editor>
+	<editor id="I_INT">
+		<range uom="56" min="-1000000" max="1000000" prec="1" />
+	</editor>
 </editors>
