@@ -263,9 +263,8 @@ class Controller(Node):
         LOGGER.debug("start")
         st = self.api_get('devices',{})
         ret = False
-        if 'code' in st and st['code'] == 200:
+        if st is not False and 'code' in st and st['code'] == 200:
             ret = st['data']['devices']
-        LOGGER.debug("done")
         return ret
 
     # *****************************************************************************
@@ -283,7 +282,7 @@ class Controller(Node):
             self.set_sensors(0)
             devices = self.devices()
             if devices is False:
-                LOGGER.error("Will try to rediscover on next long poll...")
+                LOGGER.error(f"Will try to rediscover on next long poll, devices={devices}...")
             else:
                 st = True
                 for device in devices:
