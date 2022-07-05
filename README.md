@@ -74,6 +74,9 @@ https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 ## Release Notes
 - 0.0.2: 07/04/2022
   - Fixed profile errors
+  - Fixed [Refresh Token bug](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/4)
+  - Fixed [Properly trap errors bug](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/3)
+  - Fixed [CONFIG doc not being loaded bug](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/2)
+  - Fixed [Must restart node server after setting client id and secret bug](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/1)
 - 0.0.1: 07/03/2022
   - Initial release
-
