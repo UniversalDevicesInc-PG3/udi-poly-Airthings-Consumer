@@ -5,7 +5,7 @@
 			<st id="ST" editor="cst" />
             <st id="GV1" editor="bool" /> <!-- Authorized -->
             <st id="GV3" editor="I_SST" /> <!-- Server Status -->
-            <st id="GV2" editor="I_CNT" /> <!-- Sensors -->
+            <st id="GV2" editor="I_INT" /> <!-- Sensors -->
 		</sts>
         <cmds>
             <sends>
@@ -24,7 +24,7 @@
   <nodeDef id="Sensor" nls="sensor">
     <editors/>
     <sts>
-      <st id="ST" editor="BOOL"/> <!-- Status, online? x -->
+      <st id="ST" editor="bool"/> <!-- Status, online? x -->
       <st id="BATLVL" editor="I_PCT"/> <!-- battery -->
       <st id="CO2LVL" editor="I_CO2"/> <!-- co2 -->
       <st id="CLIHUM" editor="I_HUM"/> <!-- humidity -->

@@ -72,6 +72,8 @@ ${sys.node.n004_zone_2.name} ${sys.node.n004_zone_2.status}
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 0.0.5: 07/04/2022
+  - Fixed [Can not use nodes in programs](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/5)
 - 0.0.4: 07/04/2022
   - Fixed discover which was broken in 0.0.2
 - 0.0.2: 07/04/2022
