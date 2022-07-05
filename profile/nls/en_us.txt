@@ -6,11 +6,17 @@ CMD-ctl-QUERY_ALL-NAME = Query All
 ST-ctl-ST-NAME = NodeServer Status
 ST-ctl-GV1-NAME = Authorized
 ST-ctl-GV2-NAME = Sensors
+ST-ctl-GV3-NAME = Server Status
 
 # Controller Status
 CST-0 = Disconnected
 CST-1 = Connected
 CST-2 = Failed
+
+# Server Status
+SST-0 = False
+SST-1 = True
+SST-1070 = Rate limit on API exceeded
 
 #
 # Sensor Host

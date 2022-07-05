@@ -100,11 +100,19 @@ class Sensor(Node):
         LOGGER.debug('exit')
 
     def shortPoll(self):
-        self.query()
+        LOGGER.info('enter')
+        self.query(force=False,authorize=False)
+        LOGGER.info('exit')
 
-    def query(self):
+    def query(self,force=True,authorize=True):
+        LOGGER.info('enter')
+        if authorize:
+            # Check that we are authorized
+            self.controller.authorize()
         # res={'code': 200, 'data': {'data': {'battery': 100, 'co2': 570.0, 'humidity': 43.0, 'pressure': 996.3, 'radonShortTermAvg': 10.0, 'rssi': -63, 'temp': 25.6, 'time': 1656884420, 'voc': 138.0, 'relayDeviceType': 'hub'}}}
         st = self.controller.api_get(f"devices/{self.serial}/latest-samples")
+        if st is False:
+            return False
         if st['code'] == 200:
             data = st['data']['data']
             for param in data:
@@ -130,6 +138,7 @@ class Sensor(Node):
                     self.set_voc(data[param])
                 else:
                     LOGGER.warning(f"Unknown param {param}={data[param]}")
+        LOGGER.info('exit')
 
     """
     Set Functions

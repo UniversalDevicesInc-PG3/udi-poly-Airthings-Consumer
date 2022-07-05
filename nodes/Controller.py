@@ -1,7 +1,9 @@
 
+from asyncio import format_helpers
 from udi_interface import Node,LOGGER,Custom,LOG_HANDLER
-import sys,time,logging,json
+import sys,time,logging,json,os,markdown2
 from threading import Thread,Lock
+from datetime import datetime, timedelta
 from pgSession import pgSession
 
 from nodes import Sensor
@@ -14,8 +16,10 @@ class Controller(Node):
         # These start in threads cause they take a while
         self.ready = False
         self.first_run = True
+        self.authorized = False
         self.token = False
         self.sensors = {}
+        self.cfg_longPoll = None
         self.queue_lock = Lock() # Lock for syncronizing acress threads
         self.n_queue = []
         self.Notices         = Custom(poly, 'notices')
@@ -45,6 +49,9 @@ class Controller(Node):
         self.handler_params_st      = None
         self.handler_data_st        = None
         self.handler_nsdata_st      = None
+        self.discover_st            = None
+        self.api_get_wait_until     = False
+
         poly.ready()
         poly.addNode(self, conn_status="ST")
 
@@ -97,7 +104,8 @@ class Controller(Node):
         # https://accounts-api.airthings.com/v1/token
         self.start_session()
         self.authorize()
-        self.discover()
+        # if initial discover failed, try again on next poll
+        self.discover_st = self.discover()
         self.first_run = False
         LOGGER.debug("done")
 
@@ -125,6 +133,7 @@ class Controller(Node):
 
     def handler_config(self,data):
         LOGGER.info(f'enter data={data}')
+        self.cfg_longPoll = int(data['longPoll'])
         self.handler_config_st = True
         LOGGER.info('done')
 
@@ -140,9 +149,15 @@ class Controller(Node):
             self.shortPoll()
 
     def shortPoll(self):
-        for node in self.poly.nodes():
-            if node.address != self.address:
-                node.shortPoll()
+        LOGGER.info('enter')
+        # Make sure we are still authorized
+        if self.authorize():
+            if self.discover_st is not True:
+                self.discover_st = self.discover()
+            for node in self.poly.nodes():
+                if node.address != self.address:
+                    node.shortPoll()
+        LOGGER.info('exit')
 
     def longPoll(self):
         self.heartbeat()
@@ -171,6 +186,12 @@ class Controller(Node):
         LOGGER.debug("done")
 
     def api_get(self,path,params={}):
+        if self.api_get_wait_until is not False:
+            if self.api_get_wait_until > datetime.now():
+                LOGGER.warning(f"API Rate limit exceeded, waiting until {self.api_get_wait_until} query the Airthings service.")
+                return False
+            LOGGER.warning("API Rate liming pause is over, trying again...")
+            self.api_get_wait_until = False
         res = self.session.get(
             path,params,
             auth='{} {}'.format(self.token_type,self.token),
@@ -180,26 +201,30 @@ class Controller(Node):
             return res
         if res['data'] is False:
             return False
+        # res={'code': 429, 'data': {'error': 'TOO_MANY_REQUESTS', 'error_description': 'Rate limit on API exceeded', 'error_code': 1070}}
         LOGGER.debug('res={}'.format(res))
-        if not 'status' in res['data']:
+        code = res['code']
+        if code == 200:
+            self.set_server_st(1)
             return res
-        res_st_code = int(res['data']['status']['code'])
-        if res_st_code == 0:
-            return res
-        LOGGER.error('Checking Bad Status Code {} for {}'.format(res_st_code,res))
-        if res_st_code == 14:
-            LOGGER.error( 'Token has expired, will refresh')
-            # TODO: Should this be a loop instead ?
-            if self._getRefresh() is True:
-                return self.session.get(path,{ 'json': json.dumps(data) },
-                                    auth='{} {}'.format(self.tokenData['token_type'], self.tokenData['access_token']))
-        elif res_st_code == 16:
-            self._reAuth("session_get: Token deauthorized by user: {}".format(res))
-        return False
+        if 'error_code' in res['data']:
+            self.set_server_st(res['data']['error_code'])
+        # We get thuis, don't try again for 5 minutes?
+        if code == 429 and res['data']['error'] == 'TOO_MANY_REQUESTS' and self.api_get_wait_until is False:
+            self.api_get_wait_until = datetime. now() + timedelta(seconds=60 * 5)
+        return res
 
     def authorize(self):
-        self.Notices.delete('client_id')
+        LOGGER.debug("enter")
+        if self.authorized:
+            # Check if expiring before next longpoll
+            LOGGER.debug(f"Token Expires: {self.token_expires_dt} currently: {datetime.now()}")
+            if self.token_expires_dt > datetime.now():
+                LOGGER.debug("exit")
+                return True
+            LOGGER.debug(f'Need to re-authorize...')
         st = True
+        self.Notices.delete('client_id')
         if self.client_id is None:
             msg = f"Can not authorize, client_id={self.client_id}"
             LOGGER.error(msg)
@@ -227,32 +252,42 @@ class Controller(Node):
             self.token = st['data']['access_token']
             self.token_type = st['data']['token_type']
             self.token_expires = st['data']['expires_in']
+            self.token_expires_dt = datetime. now() + timedelta(seconds=self.token_expires)
         LOGGER.debug("done")
+        return True
 
     def devices(self):
         LOGGER.debug("start")
         st = self.api_get('devices',{})
+        ret = False
         if 'code' in st and st['code'] == 200:
-            return st['data']['devices']
+            ret = st['data']['devices']
         LOGGER.debug("done")
+        return ret
 
     # *****************************************************************************
 
     def discover(self, *args, **kwargs):
         LOGGER.debug("start")
+        st = False
         nkey = 'discover'
         self.Notices.delete(nkey)
         if self.handler_params_st is not True:
             msg = f"Can not discover until Params are defined. (st={self.handler_params_st})"
             LOGGER.error(msg)
             self.Notices[nkey] = msg
-        if not self.authorized:
-            LOGGER.warning("Can't discover, not authorized")
-            return
-        self.set_sensors(0)
-        for device in self.devices():
-            st = self.add_device(device)
-        return
+        if self.authorize():
+            self.set_sensors(0)
+            devices = self.devices()
+            if devices is False:
+                LOGGER.error("Will try to rediscover on next long poll...")
+            else:
+                st = True
+                for device in devices:
+                    self.add_device(device)
+        else:
+            LOGGER.warning("Can't discover, not authorized, will try again on next long poll...")
+        return st
 
     def add_device(self,device):
         LOGGER.debug(f"start: {device}")
@@ -398,6 +433,9 @@ class Controller(Node):
         self.num_sensors += 1
         self.setDriver('GV2', self.num_sensors)
 
+    def set_server_st(self,val):
+        self.setDriver('GV3', val)
+
     """
     Command Functions
     """
@@ -420,4 +458,5 @@ class Controller(Node):
         {'driver': 'ST',  'value': 1, 'uom': 25},   # connection status
         {'driver': 'GV1', 'value': 0, 'uom': 2},    # authorized
         {'driver': 'GV2', 'value': 0, 'uom': 56},   # sensors
+        {'driver': 'GV3', 'value': 0, 'uom': 25},   # server status
     ]

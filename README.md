@@ -18,7 +18,7 @@ Open the Configuration Page for the Nodeserver in the Polyglot UI and view the [
 
 ## Requirements
 
-This supports consumer devices from <a href="https://www.airthings.com/">Airthings</a>.  Currently it has only been tested with a Wave Plus device, but is currently built in a generic way to support any sensor.  But, if that sensor doesn't support everything the Wave Plus does then you will see those drivers with empty values.  I will work on resolving this withough requiring customizing the interface for each device.
+This supports consumer devices from <a href="https://www.airthings.com/">Airthings</a>.  It has only been tested with a Wave Plus device, but is currently built in a generic way to support any sensor.  But, if that sensor doesn't support everything the Wave Plus does then you will see those drivers with empty values.  I will work on resolving this withough requiring customizing the interface for each device.
 
 ## Using this Node Server
 

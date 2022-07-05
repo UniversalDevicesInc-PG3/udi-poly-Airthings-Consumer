@@ -4,7 +4,7 @@
 
 ## Short Poll
 
-The API is limited to 120 requests per hour per the <a href="https://developer.airthings.com/docs/api-rate-limit-consumer/">Airthing Rate Limit</a>. So short poll time is set 30 seconds which is 120 times and hour.  To reduce traffic to your ISY you can increase the short poll time in the configuration and restart the node server.
+The API is limited to 120 requests per hour as documented on the <a href="https://developer.airthings.com/docs/api-rate-limit-consumer/">Airthing Rate Limit</a>. The short poll time is set 60 seconds so this should not be an issue, but you can increase or decreas as desired.  IF you change the value then you must restart the node server.
 
 ## Long Poll
 
