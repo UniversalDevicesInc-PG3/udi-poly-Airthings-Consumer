@@ -201,6 +201,7 @@ class Controller(Node):
             return res
         if res['data'] is False:
             return False
+        # res={'code': 401, 'data': {'message': 'Unauthorized'}}
         # res={'code': 429, 'data': {'error': 'TOO_MANY_REQUESTS', 'error_description': 'Rate limit on API exceeded', 'error_code': 1070}}
         LOGGER.debug('res={}'.format(res))
         code = res['code']
@@ -209,6 +210,8 @@ class Controller(Node):
             return res
         if 'error_code' in res['data']:
             self.set_server_st(res['data']['error_code'])
+        else:
+            self.set_server_st(code)
         # We get thuis, don't try again for 5 minutes?
         if code == 429 and res['data']['error'] == 'TOO_MANY_REQUESTS' and self.api_get_wait_until is False:
             self.api_get_wait_until = datetime. now() + timedelta(seconds=60 * 5)

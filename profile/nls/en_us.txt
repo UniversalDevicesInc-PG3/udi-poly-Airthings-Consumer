@@ -16,6 +16,7 @@ CST-2 = Failed
 # Server Status
 SST-0 = False
 SST-1 = True
+SST-401 = Unauthorized
 SST-1070 = Rate limit on API exceeded
 
 #
