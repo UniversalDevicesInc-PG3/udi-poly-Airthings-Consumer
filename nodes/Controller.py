@@ -150,13 +150,7 @@ class Controller(Node):
 
     def shortPoll(self):
         LOGGER.info('enter')
-        # Make sure we are still authorized
-        if self.authorize():
-            if self.discover_st is not True:
-                self.discover_st = self.discover()
-            for node in self.poly.nodes():
-                if node.address != self.address:
-                    node.shortPoll()
+        self._query_all()
         LOGGER.info('exit')
 
     def longPoll(self):
@@ -172,9 +166,22 @@ class Controller(Node):
             self.hb = 0
 
     def query(self):
-        if not self.authorized('query') : return False
-        self.is_signed_in()
-        self.reportDrivers();
+        self.reportDrivers()
+
+    def query_all(self,opt):
+        self._query_all()
+        self.reportDrivers()
+
+    def _query_all(self):
+        LOGGER.info('enter')
+        # Make sure we are still authorized
+        if self.authorize():
+            if self.discover_st is not True:
+                self.discover_st = self.discover()
+            for node in self.poly.nodes():
+                if node.address != self.address:
+                    node.shortPoll()
+        LOGGER.info('exit')
 
     # *****************************************************************************
     #
@@ -317,7 +324,9 @@ class Controller(Node):
         LOGGER.info('Oh God I\'m being deleted. Nooooooooooooooooooooooooooooooooooooooooo.')
 
     def handler_stop(self):
-        LOGGER.debug('NodeServer stopped.')
+        LOGGER.debug('NodeServer stopping...')
+        self.set_auth_st(False)
+        self.set_server_st(0)
 
     #def handler_data(self,data):
     #    LOGGER.debug('enter: Loading data')
@@ -453,8 +462,7 @@ class Controller(Node):
     id = 'Controller'
     commands = {
         'QUERY': query,
-        'QUERY_ALL': query,
-        'UPDATE_PROFILE': query,
+        'QUERY_ALL': query_all,
     }
     drivers = [
         {'driver': 'ST',  'value': 1, 'uom': 25},   # connection status
