@@ -4,7 +4,7 @@
 
 ## Short Poll
 
-The API is limited to 120 requests per hour as documented on the <a href="https://developer.airthings.com/docs/api-rate-limit-consumer/">Airthing Rate Limit</a>. The short poll time is set 60 seconds so this should not be an issue, but you can increase or decreas as desired.  IF you change the value then you must restart the node server.
+The API is limited to 120 requests per hour as documented on the <a href="https://developer.airthings.com/docs/api-rate-limit-consumer/">Airthings Rate Limit</a>. The short poll time is set 60 seconds which will be ok if you have 1 or 2 sensors, but you have more than increase it to 30 x number of sensors.  IF you change the value then you must restart the node server.
 
 ## Long Poll
 
