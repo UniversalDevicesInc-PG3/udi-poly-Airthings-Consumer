@@ -6,7 +6,7 @@ I am not responsible for any issues related to this nodeserver.
 
 ## Help
 
-If you have any issues are questions you can ask on [PG3 AirThings SubForum](https://forum.universal-devices.com/forum/309-airthings/) or report an issue at [PG3 Airthings Consumer Github issues](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues).
+If you have any issues are questions you can ask on [PG3 AirThings-C SubForum](https://forum.universal-devices.com/forum/385-airthings-c/) or report an issue at [PG3 Airthings Consumer Github issues](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues).
 
 ## Installation
 
