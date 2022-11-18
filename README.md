@@ -30,8 +30,13 @@ This supports consumer devices from <a href="https://www.airthings.com/">Airthin
 
 This has the following status:
 - NodeServer Online
-  - Nodeserver up and running
-- Sensor Count
+  - Nodeserver up and running, this is managed by PG3 and will be Disconnected, Connected, or Failed
+- Authroized
+  - If the Authorization to the Airthings Servics is currently valid
+- Server Status
+  - If the last connection to Airthing Server was successful, if there is a communcation problem to their service this will go False, and when service is restored it will go back to True.
+- Sensors
+  - The number of Airthings devices
 
 #### Sensor Node
 
