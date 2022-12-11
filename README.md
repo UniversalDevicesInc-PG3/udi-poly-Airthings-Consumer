@@ -77,6 +77,8 @@ ${sys.node.n004_zone_2.name} ${sys.node.n004_zone_2.status}
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.0.0: 12/11/2022
+  - Fixed [Crash when trying to print error message](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/15)
 - 0.0.6: 07/05/2022
   - Fixed [Crash on query](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/6)
 - 0.0.5: 07/04/2022
