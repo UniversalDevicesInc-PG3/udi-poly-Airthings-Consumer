@@ -95,7 +95,6 @@ class Sensor(Node):
 #        else:
 #            # Otherwise just report previous values
 #            self.reportDrivers()
-        self.set_st(self.device['segment']['active'])
         self.query()
         LOGGER.debug('exit')
 
@@ -106,6 +105,7 @@ class Sensor(Node):
 
     def query(self,force=True,authorize=True):
         LOGGER.info('enter')
+        self.set_st(self.device['segment']['active'],force=force)
         if authorize:
             # Check that we are authorized
             self.controller.authorize()
@@ -117,25 +117,25 @@ class Sensor(Node):
             data = st['data']['data']
             for param in data:
                 if param == 'battery':
-                    self.set_battery(data[param])
+                    self.set_battery(data[param],force=force)
                 elif param == 'co2':
-                    self.set_co2(data[param])
+                    self.set_co2(data[param],force=force)
                 elif param == 'humidity':
-                    self.set_hum(data[param])
+                    self.set_hum(data[param],force=force)
                 elif param == 'pressure':
-                    self.set_pressure(data[param])
+                    self.set_pressure(data[param],force=force)
                 elif param == 'radonShortTermAvg':
-                    self.set_radon(data[param])
+                    self.set_radon(data[param],force=force)
                 elif param == 'relayDeviceType':
                     pass
                 elif param == 'rssi':
-                    self.set_rssi(data[param])
+                    self.set_rssi(data[param],force=force)
                 elif param == 'temp':
-                    self.set_temp(data[param])
+                    self.set_temp(data[param],force=force)
                 elif param == 'time':
-                    self.set_time(data[param])
+                    self.set_time(data[param],force=force)
                 elif param == 'voc':
-                    self.set_voc(data[param])
+                    self.set_voc(data[param],force=force)
                 else:
                     LOGGER.warning(f"Unknown param {param}={data[param]}")
         LOGGER.info('exit')
@@ -143,55 +143,55 @@ class Sensor(Node):
     """
     Set Functions
     """
-    def set_st(self,val):
+    def set_st(self,val,force=False):
         self.authorized = val
         ival = 1 if val else 0
         LOGGER.debug("{}:set_st: {}={}".format(self.address,val,ival))
-        self.setDriver('ST',ival,uom=2)
+        self.setDriver('ST',ival,uom=2,force=force)
 
     def set_battery(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
-        self.setDriver('BATLVL', int(value))
+        self.setDriver('BATLVL', int(value),force=force)
 
-    def set_co2(self,value):
+    def set_co2(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
-        self.setDriver('CO2LVL', myfloat(value,1))
+        self.setDriver('CO2LVL', myfloat(value,1),force=force)
 
-    def set_hum(self,value):
+    def set_hum(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
-        self.setDriver('CLIHUM', myfloat(value,1))
+        self.setDriver('CLIHUM', myfloat(value,1),force=force)
 
-    def set_pressure(self,value):
+    def set_pressure(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
-        self.setDriver('BARPRES', myfloat(value,1))
+        self.setDriver('BARPRES', myfloat(value,1),force=force)
 
     # One pCi/L is equivalent to 37 Bq/m3.
-    def set_radon(self,value):
+    def set_radon(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
         if self.units == "US":
-            self.setDriver('GV1', myfloat(value/37,1))
+            self.setDriver('GV1', myfloat(value/37,1),force=force)
         else:
-            self.setDriver('GV1', myfloat(value,1))
+            self.setDriver('GV1', myfloat(value,1),force=force)
 
-    def set_rssi(self,value):
+    def set_rssi(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
-        self.setDriver('GV3', int(value))
+        self.setDriver('GV3', int(value),force=force)
 
     # (17=F 4=C)
-    def set_temp(self,value):
+    def set_temp(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
         if self.units == "US":
-            self.setDriver('CLITEMP', myfloat(CtoF(value),1), uom=17)
+            self.setDriver('CLITEMP', myfloat(CtoF(value),1), uom=17,force=force)
         else:
-            self.setDriver('CLITEMP', myfloat(value,1), uom=4)
+            self.setDriver('CLITEMP', myfloat(value,1), uom=4,force=force)
 
-    def set_time(self,value):
+    def set_time(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
-        self.setDriver('GV2', int(value))
+        self.setDriver('GV2', int(value),force=force)
 
-    def set_voc(self,value):
+    def set_voc(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
-        self.setDriver('GV4', myfloat(value,1))
+        self.setDriver('GV4', myfloat(value,1),force=force)
         self.set_voc_level(value)
     
     #96 = VOC Level
@@ -199,7 +199,7 @@ class Sensor(Node):
     #  2 - Slightly Polluted
     #  3 - Moderately Polluted
     #  4 - Highly Polluted
-    def set_voc_level(self,value):
+    def set_voc_level(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
         if value < 250:
             lvl = 1
@@ -209,7 +209,7 @@ class Sensor(Node):
             lvl = 3
         else:
             lvl = 4
-        self.setDriver('VOCLVL',lvl)
+        self.setDriver('VOCLVL',lvl,force=force)
 
     """
     """

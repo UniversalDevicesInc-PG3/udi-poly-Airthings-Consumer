@@ -82,7 +82,9 @@ https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
   - Fixed [Crash when trying to print error message](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/15)
   - Fixed [Server Status is integer in program reference, should be boolean](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/16)
   - Enhancement [Add ability to rename nodes](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/14)
-  
+  - For [Check why rate limit is being hit](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/13)
+    - Add warning and PG3 UI notice if users shortPoll is to low
+  - Fixed [Send all data on a query](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/12)
 - 0.0.6: 07/05/2022
   - Fixed [Crash on query](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/6)
 - 0.0.5: 07/04/2022
