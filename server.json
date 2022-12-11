@@ -10,12 +10,12 @@
     "longPoll": "600",
 	"logLevel": "DEBUG",
     "discover": true,
-    "profile_version": "0",
+    "profile_version": "1.0.0",
     "credits": [
         {
             "title": "udi-WirelessSensorTags-poly: A NodeServer for CAO Gadgets Wireless Sensor Tags",
             "author": "JimBoCA",
-            "version": "0.0.6",
+            "version": "1.0.0",
             "date": "July 3, 2022",
             "source": "https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer",
             "license": "https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/master/LICENSE"
