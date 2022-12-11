@@ -51,6 +51,7 @@ class Controller(Node):
         self.handler_nsdata_st      = None
         self.discover_st            = None
         self.api_get_wait_until     = False
+        self.change_node_names      = False
 
         poly.ready()
         poly.addNode(self, conn_status="ST")
@@ -75,24 +76,8 @@ class Controller(Node):
     def add_node(self,node):
         # See if we need to check for node name changes where ELK is the source
         address = node.address
-        cname = self.poly.getNodeNameFromDb(address)
-        if cname is not None:
-            LOGGER.debug(f"node {address} Requested: '{node.name}' Current: '{cname}'")
-            # Check that the name matches
-            if node.name != cname:
-                if 'change_node_names' in self.Params and self.Params['change_node_names'] == 'true':
-                    LOGGER.warning(f"Existing node name '{cname}' for {address} does not match requested name '{node.name}', changing to match")
-                    self.poly.renameNode(address,node.name)
-                elif 'change_node_names' in self.Params:
-                    LOGGER.warning(f"Existing node name '{cname}' for {address} does not match requested name '{node.name}', NOT changing to match, set change_node_names=true to enable")
-                    # Change it to existing name to avoid addNode error
-                    node.name = cname
-                else:
-                    LOGGER.warning(f"Existing node name '{cname}' for {address} does not match requested name '{node.name}', NOT changing to match")
-                    # Change it to existing name to avoid addNode error
-                    node.name = cname
         LOGGER.debug(f"Adding: {node.name}")
-        self.poly.addNode(node)
+        self.poly.addNode(node, rename=self.change_node_names)
         self.wait_for_node_done()
         gnode = self.poly.getNode(address)
         if gnode is None:
@@ -371,7 +356,7 @@ class Controller(Node):
             'units': 'US',
             'client_id': '',
             'client_secret': "",
-            #'change_node_names': "false"
+            'change_node_names': "false"
         }
         if data is not None:
             # Load what we have
@@ -407,7 +392,7 @@ class Controller(Node):
             msg = f"Units must be 'US' or 'METRIC', assuming 'US'"
             LOGGER.error(msg)
             self.Notices['unitsv'] = msg
-
+        self.change_node_names = self.Params['change_node_names']
         self.handler_params_st = st
         if not self.first_run:
             self.discover()

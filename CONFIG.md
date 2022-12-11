@@ -26,3 +26,8 @@ The client_secret from your app
 
 Set to US or Metric
 
+### change_node_names
+
+Set to true if you want the node names in PG3 and the ISY to always be changed to match the names of devices in the Airthings app when they are changed.  This is on done on node server startup.
+
+
