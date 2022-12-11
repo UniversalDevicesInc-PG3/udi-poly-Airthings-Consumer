@@ -14,16 +14,10 @@ CST-1 = Connected
 CST-2 = Failed
 
 # Server Status
-ST-ctl-SST-0 = False
-ST-ctl-SST-1 = True
-ST-ctl-SST-401 = Unauthorized
-ST-ctl-SST-1070 = Rate limit on API exceeded
-
-CMD-ctl-SST-0 = False
-CMD-ctl-SST-1 = True
-CMD-ctl-SST-401 = Unauthorized
-CMD-ctl-SST-1070 = Rate limit on API exceeded
-
+SST-0 = False
+SST-1 = True
+SST-401 = Unauthorized
+SST-1070 = Rate limit on API exceeded
 
 #
 # Sensor Host
