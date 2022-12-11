@@ -91,6 +91,9 @@ class pgSession():
         elif response.status_code == 401:
             # Authentication error
             self.logger.error("Unauthorized: %s: text: %s" % (response.url,response.text) )
+        elif response.status_code == 429:
+            # Server specifc error, don't whine about it, let the caller handle it
+            pass
         elif response.status_code == 500:
             self.logger.error("Server Error: %s %s: text: %s" % (response.status_code,response.url,response.text) )
         elif response.status_code == 522:

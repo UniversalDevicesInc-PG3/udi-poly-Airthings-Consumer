@@ -111,8 +111,8 @@ class Sensor(Node):
             self.controller.authorize()
         # res={'code': 200, 'data': {'data': {'battery': 100, 'co2': 570.0, 'humidity': 43.0, 'pressure': 996.3, 'radonShortTermAvg': 10.0, 'rssi': -63, 'temp': 25.6, 'time': 1656884420, 'voc': 138.0, 'relayDeviceType': 'hub'}}}
         st = self.controller.api_get(f"devices/{self.serial}/latest-samples")
-        if st is False:
-            return False
+        if st is False or st is None:
+            return st
         if st['code'] == 200:
             data = st['data']['data']
             for param in data:

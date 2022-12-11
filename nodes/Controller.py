@@ -20,6 +20,9 @@ class Controller(Node):
         self.token = False
         self.sensors = {}
         self.cfg_longPoll = None
+        self.cfg_shortPoll = None
+        self.num_sensors = 0
+        self.nkey_sp = 'shortPoll'
         self.queue_lock = Lock() # Lock for syncronizing acress threads
         self.n_queue = []
         self.Notices         = Custom(poly, 'notices')
@@ -51,6 +54,7 @@ class Controller(Node):
         self.handler_nsdata_st      = None
         self.discover_st            = None
         self.api_get_wait_until     = False
+        self.api_get_wait_notified  = False
         self.change_node_names      = False
 
         poly.ready()
@@ -119,6 +123,8 @@ class Controller(Node):
     def handler_config(self,data):
         LOGGER.info(f'enter data={data}')
         self.cfg_longPoll = int(data['longPoll'])
+        self.cfg_shortPoll = int(data['shortPoll'])
+        self.check_short_poll()
         self.handler_config_st = True
         LOGGER.info('done')
 
@@ -180,8 +186,11 @@ class Controller(Node):
     def api_get(self,path,params={}):
         if self.api_get_wait_until is not False:
             if self.api_get_wait_until > datetime.now():
-                LOGGER.warning(f"API Rate limit exceeded, waiting until {self.api_get_wait_until} query the Airthings service.")
-                return False
+                # Only notify once per wait session
+                if not self.api_get_wait_notified:
+                    LOGGER.warning(f"API Rate limit exceeded, waiting until {self.api_get_wait_until} to query the Airthings service again.")
+                    self.api_get_wait_notified = True
+                return None
             LOGGER.warning("API Rate liming pause is over, trying again...")
             self.api_get_wait_until = False
         res = self.session.get(
@@ -193,6 +202,8 @@ class Controller(Node):
             return res
         if res['data'] is False:
             return False
+        #
+        # Profile only supports these specific errors, any others set it to False
         # res={'code': 401, 'data': {'message': 'Unauthorized'}}
         # res={'code': 429, 'data': {'error': 'TOO_MANY_REQUESTS', 'error_description': 'Rate limit on API exceeded', 'error_code': 1070}}
         LOGGER.debug('res={}'.format(res))
@@ -201,12 +212,21 @@ class Controller(Node):
             self.set_server_st(1)
             return res
         if 'error_code' in res['data']:
-            self.set_server_st(res['data']['error_code'])
+            if res['data']['error_code'] == 1070:
+                self.set_server_st(res['data']['error_code'])
+            else:
+                LOGGER.error(f"Unknown error code {res['data']['error_code']} in {res['data']}")
+                self.set_server_st(0)
         else:
-            self.set_server_st(code)
+            if code == 401:
+                self.set_server_st(code)
+            else:
+                LOGGER.error(f"Unknown error code {code}")
+                self.set_server_st(0)
         # We get thuis, don't try again for 5 minutes?
         if code == 429 and res['data']['error'] == 'TOO_MANY_REQUESTS' and self.api_get_wait_until is False:
             self.api_get_wait_until = datetime. now() + timedelta(seconds=60 * 5)
+            self.api_get_wait_notified = False
         return res
 
     def authorize(self):
@@ -254,6 +274,9 @@ class Controller(Node):
     def devices(self):
         LOGGER.debug("start")
         st = self.api_get('devices',{})
+        if st is None:
+            # Waiting on timeout...
+            return st
         ret = False
         if st is not False and 'code' in st and st['code'] == 200:
             ret = st['data']['devices']
@@ -264,24 +287,40 @@ class Controller(Node):
     def discover(self, *args, **kwargs):
         LOGGER.debug("start")
         st = False
+        msg = ''
         nkey = 'discover'
         self.Notices.delete(nkey)
         if self.handler_params_st is not True:
             msg = f"Can not discover until Params are defined. (st={self.handler_params_st})"
-            LOGGER.error(msg)
-            self.Notices[nkey] = msg
         if self.authorize():
             self.set_sensors(0)
             devices = self.devices()
+            if devices is None:
+                # Waiting for error timeout... Don't say aything
+                return False
             if devices is False:
-                LOGGER.error(f"Will try to rediscover on next long poll, devices={devices}...")
+                msg = f"Will try to rediscover on next poll, devices={devices}..."
             else:
                 st = True
                 for device in devices:
                     self.add_device(device)
+                self.check_short_poll()
         else:
-            LOGGER.warning("Can't discover, not authorized, will try again on next long poll...")
+            msg = "Can't discover, not authorized, will try again on next poll..."
+        if msg != "":
+            self.Notices[nkey] = msg
+            LOGGER.warning(msg)
         return st
+
+    def check_short_poll(self):
+        rval = 30 * self.num_sensors
+        if int(self.cfg_shortPoll) < rval:
+            # This is a unique message
+            tmsg = f"Your shortPoll={self.cfg_shortPoll} is to low for {self.num_sensors} sensors, please change to at least {rval}"
+            LOGGER.warning(tmsg)
+            self.Notices[self.nkey_sp] = tmsg
+        else:
+            self.Notices.delete(self.nkey_sp)
 
     def add_device(self,device):
         LOGGER.debug(f"start: {device}")
@@ -428,6 +467,7 @@ class Controller(Node):
     def incr_sensors(self):
         self.num_sensors += 1
         self.setDriver('GV2', self.num_sensors)
+
 
     def set_server_st(self,val):
         self.setDriver('GV3', val)
