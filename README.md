@@ -42,6 +42,22 @@ This has the following status:
 
 This node has the following status
 
+| Name                                             | Type | Support |
+| -----------------------------------------------* | ---* | ------* |
+| Motion Sensor Tag (8-bit temperature)            | 12   | 1       |
+| Motion Sensor Tag (13-bit temperature+humidity)  | 13   | 2       |
+| Motion Sensor Tag Pro                            | 21   | 2       |
+| Motion Sensor Tag Pro ALS (Ambient Light Sensor) | 26   | 2       |
+| Water/Soil moisture sensor                       | 32   | 1       |
+| Outdoor Probe/Thermocouple                       | 42   | 3       |
+| Door/window (reed) KumoSensor                    | 52   | 2       |
+| Kumostat/Nest Thremostat                         | 62   | 4       |
+| Infra-Red (PIR) KumoSensor                       | 72   | 2       |
+| WeMo Switches/Maker/LED                          | 82   | 4       |
+| Webcams (Dropcam)                                | 92   | 4       |
+| External Power Sensor (USB) Basic                | 102  | 1       |
+| External Power Sensor (USB) Precision            | 107  | 1       |
+
 | Name                | Driver  | Description                    |
 | ------------------* | ------* | -----------------------------* |
 | Active              | ST      | The device is currently active |
