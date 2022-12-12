@@ -82,8 +82,6 @@ Following are examples have usages for this nodeserver.
 
 ### Notifications
 
-TBD, update to this nodeservers drivers...
-
 To include any information about a Sensor in a notification you can use any if these drivers:
 ```
 Sensor: ${sys.node.n004_s_2930020110.name}
@@ -92,7 +90,7 @@ Sensor: ${sys.node.n004_s_2930020110.name}
  Temperature:         ${sys.node.n004_s_2930020110.CLITEMP}
  ...
 ```
-and of course if the notificaiton is triggered by a program from a change in the sensor just replace 'n004_s_2930020110' with '#'.
+and of course if the notification is triggered by a program from a change in the sensor just replace 'n004_s_2930020110' with '#'.
 
 ## TODO and issues
 
