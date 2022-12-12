@@ -42,7 +42,6 @@ This has the following status:
 
 This node has the following status
 
-
 | Name                | Driver  | Description                    |
 | ------------------* | ------* | -----------------------------* |
 | Active              | ST      | The device is currently active |
@@ -50,16 +49,15 @@ This node has the following status
 | C02 Level           | CO2LVL  | The CO2 level |
 | Humidity            | CLIHUM  | The Humidity level |
 | Barometric Pressure | BARPRES | The Barometric Pressure |
-| Radon               | GV1     | The Radon level |
+| Radon               | GV1     | The Radon level https://help.airthings.com/en/collections/2683690-understanding-radon-and-iaq#vocs |
 | RSSI                | GV3     | The RSSI level |
 | Temperature         | CLITEMP | The Temperature |
 | Time                | GV2     | The time of device measurment, epoch value which is not currently useful in the ISY except to watch it change |
-| VOC                 | GV4     | The VOC measurement |
-| Voc Level           | VOCLVL  | The text description of the VOC |
+| VOC                 | GV4     | The VOC measurement https://www.airthings.com/what-is-voc |
+| VOC Level           | VOCLVL  | The text description of the VOC |
 
 
-https://www.airthings.com/what-is-voc
-https://help.airthings.com/en/collections/2683690-understanding-radon-and-iaq#vocs
+
 
 ## Using the Nodeserver
 
