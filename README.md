@@ -42,7 +42,7 @@ This has the following status:
 
 This node has the following status
 
-| Name                | Driver  | Description
+| Name                | Driver  | Description                    |
 | ------------------* | ------* | -----------------------------* |
 | Active              | ST      | The device is currently active |
 | Battery Level       | BATLVL  | The battery level percentage |
