@@ -34,13 +34,27 @@ This has the following status:
 - Authroized
   - If the Authorization to the Airthings Servics is currently valid
 - Server Status
-  - If the last connection to Airthing Server was successful, if there is a communcation problem to their service this will go False, and when service is restored it will go back to True.
+  - If the last connection to Airthing Server was successful, if there is a communcation problem to their service this will go False, or one of the other known error values, and when service is restored it will go back to True.
 - Sensors
   - The number of Airthings devices
 
 #### Sensor Node
 
-TBD
+This node has the following status
+
+| Name                | Driver  | Description
+| Active              | ST      | The device is currently active |
+| Battery Level       | BATLVL  | The battery level percentage |
+| C02 Level           | CO2LVL  | The CO2 level |
+| Humidity            | CLIHUM  | The Humidity level |
+| Barometric Pressure | BARPRES | The Barometric Pressure |
+| Radon               | GV1     | The Radon level |
+| RSSI                | GV3     | The RSSI level |
+| Temperature         | CLITEMP | The Temperature |
+| Time                | GV2     | The time of device measurment, epoch value which is not currently useful in the ISY except to watch it change |
+| VOC                 | GV4     | The VOC measurement |
+| Voc Level           | VOCLVL  | The text description of the VOC |
+
 
 https://www.airthings.com/what-is-voc
 https://help.airthings.com/en/collections/2683690-understanding-radon-and-iaq#vocs
@@ -53,24 +67,15 @@ Following are examples have usages for this nodeserver.
 
 TBD, update to this nodeservers drivers...
 
-To include any information about a Zone in a notification you can use any if these drivers:
+To include any information about a Sensor in a notification you can use any if these drivers:
 ```
-Area: ${sys.node.n004_area_1.name}
- Alarm Status:        ${sys.node.n004_area_1.ST}
- Armed Status:        ${sys.node.n004_area_1.GV0}
- Arm Up State:        ${sys.node.n004_area_1.GV1}
- Last Violated Zone:  ${sys.node.n004_area_1.GV8}
- Last Triggered Zone: ${sys.node.n004_area_1.GV9}
- Chime Mode:          ${sys.node.n004_area_1.GV2}
- Zones Violated:      ${sys.node.n004_area_1.GV3}
- Zones Bypassed:      ${sys.node.n004_area_1.GV4}
- Last user:           ${sys.node.n004_area_1.GV6}
- Last Keypad:         ${sys.node.n004_area_1.GV7}
-
-${sys.node.n004_zone_1.name} ${sys.node.n004_zone_1.status}
-${sys.node.n004_zone_2.name} ${sys.node.n004_zone_2.status}
-...
+Sensor: ${sys.node.n004_s_2930020110.name}
+ Active:              ${sys.node.n004_s_2930020110.ST}
+ Battery:             ${sys.node.n004_s_2930020110.BATLVL}
+ Temperature:         ${sys.node.n004_s_2930020110.CLITEMP}
+ ...
 ```
+and of course if the notificaiton is triggered by a program from a change in the sensor just replace 'n004_s_2930020110' with '#'.
 
 ## TODO and issues
 
@@ -85,6 +90,7 @@ https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
   - For [Check why rate limit is being hit](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/13)
     - Add warning and PG3 UI notice if users shortPoll is to low
   - Fixed [Send all data on a query](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/12)
+  - Documented [Confirm what the time value is from Airthings API](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/11)
 - 0.0.6: 07/05/2022
   - Fixed [Crash on query](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/6)
 - 0.0.5: 07/04/2022
