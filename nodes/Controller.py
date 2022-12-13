@@ -193,7 +193,7 @@ class Controller(Node):
                     LOGGER.warning(f"API Rate limit exceeded, waiting until {self.api_get_wait_until} to query the Airthings service again.")
                     self.api_get_wait_notified = True
                 return None
-            LOGGER.warning("API Rate liming pause is over, trying again...")
+            LOGGER.warning("API Rate limit pause is over, trying again...")
             self.api_get_wait_until = False
         res = self.session.get(
             path,params,
