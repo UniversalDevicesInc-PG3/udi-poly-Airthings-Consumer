@@ -2,7 +2,7 @@
     <nodeDef id="Controller" nls="ctl">
         <editors />
         <sts>
-			<st id="ST" editor="cst" />
+			      <st id="ST" editor="cst" />
             <st id="GV1" editor="bool" /> <!-- Authorized -->
             <st id="GV3" editor="I_SST" /> <!-- Server Status -->
             <st id="GV2" editor="I_INT" /> <!-- Sensors -->

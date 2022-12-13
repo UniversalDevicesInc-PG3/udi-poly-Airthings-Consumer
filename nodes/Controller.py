@@ -184,6 +184,8 @@ class Controller(Node):
         LOGGER.debug("done")
 
     def api_get(self,path,params={}):
+        if not self.authorized:
+            LOGGER.error("Not Authorized")
         if self.api_get_wait_until is not False:
             if self.api_get_wait_until > datetime.now():
                 # Only notify once per wait session

@@ -97,6 +97,9 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.0.1: 12/12/2022
+  - Force udi_interface to 3.0.51
+  - Fix crash on initial startup if not authorized
 - 1.0.0: 12/11/2022
   Been around long enough to be 1.0.0
   - Fixed [Crash when trying to print error message](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/15)
