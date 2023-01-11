@@ -66,6 +66,8 @@ class pgSession():
 
     def response(self,response,name):
         fname = 'reponse:'+name
+        #Got: code=403
+        #text={"error":"ACCESS_DENIED_DEVICE_DOES_NOT_BELONG_TO_USER","error_description":"device does not belong to user"}
         self.logger.debug(' Got: code=%s' % (response.status_code))
         if self.debug_level <= 2:
             self.logger.debug('      text=%s' % (response.text))
@@ -79,29 +81,33 @@ class pgSession():
             if st:
                 self.logger.error('Failed to convert to json {0}: {1}'.format(response.text,err), exc_info=True)
             json_data = {'message': None}
-        if response.status_code == 200:
-            self.logger.debug(' All good!')
-            st = True
-        elif response.status_code == 400:
-            self.logger.error("Bad request: %s: text: %s" % (response.url,response.text) )
-        elif response.status_code == 403:
-            self.logger.error("Forbidden: %s: text: %s" % (response.url,json_data['message']) )
-        elif response.status_code == 404:
-            self.logger.error("Not Found: %s: text: %s" % (response.url,response.text) )
-        elif response.status_code == 401:
-            # Authentication error
-            self.logger.error("Unauthorized: %s: text: %s" % (response.url,response.text) )
-        elif response.status_code == 429:
-            # Server specifc error, don't whine about it, let the caller handle it
-            pass
-        elif response.status_code == 500:
-            self.logger.error("Server Error: %s %s: text: %s" % (response.status_code,response.url,response.text) )
-        elif response.status_code == 522:
-            self.logger.error("Timeout Error: %s %s: text: %s" % (response.status_code,response.url,response.text) )
-        else:
-            self.logger.error("Unknown response %s: %s %s" % (response.status_code, response.url, response.text) )
-            self.logger.error("Check AirThings system status")
-        return { 'code': response.status_code, 'data': json_data }
+        try:
+            if response.status_code == 200:
+                self.logger.debug(' All good!')
+                st = True
+            elif response.status_code == 400:
+                self.logger.error("Bad request: %s: text: %s" % (response.url,response.text) )
+            elif response.status_code == 403:
+                self.logger.error("Forbidden: %s: text: %s" % (response.url,response.text) )
+            elif response.status_code == 404:
+                self.logger.error("Not Found: %s: text: %s" % (response.url,response.text) )
+            elif response.status_code == 401:
+                # Authentication error
+                self.logger.error("Unauthorized: %s: text: %s" % (response.url,response.text) )
+            elif response.status_code == 429:
+                # Server specifc error, don't whine about it, let the caller handle it
+                pass
+            elif response.status_code == 500:
+                self.logger.error("Server Error: %s %s: text: %s" % (response.status_code,response.url,response.text) )
+            elif response.status_code == 522:
+                self.logger.error("Timeout Error: %s %s: text: %s" % (response.status_code,response.url,response.text) )
+            else:
+                self.logger.error("Unknown response %s: %s %s" % (response.status_code, response.url, response.text) )
+                self.logger.error("Check AirThings system status")
+            return { 'code': response.status_code, 'data': json_data }
+        except (Exception) as err:
+            self.logger.error('Failed handling return data {0}: {1}'.format(json_data,err), exc_info=True)            
+            return { 'code': '500', 'data': json_data }
 
     def post(self,path,payload,api_key=None,content="json"):
         self.logger.debug(f'start: path={path} payload={payload} api_key={api_key} content={content}')
