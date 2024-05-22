@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-This is a NodeServer example by JImBo Tags for Polyglot v2 written in Python3
-by JimBoCA jimboca3@gmail.com
+This is a NodeServer for Airthings Consumer API Polyglot v3 written in Python3
+by JimBo.Automates jimbo.automates@gmail.com
 """
 
 from udi_interface import Interface,LOGGER
 import sys
 import time
-from nodes import Controller
+from nodes import VERSION, Controller
 
 if __name__ == "__main__":
     if sys.version_info < (3, 6):
@@ -15,7 +15,7 @@ if __name__ == "__main__":
         sys.exit(1)
     try:
         polyglot = Interface([Controller])
-        polyglot.start()
+        polyglot.start(VERSION)
         control = Controller(polyglot, 'controller', 'controller', 'Airthings Controller')
         polyglot.runForever()
     except (KeyboardInterrupt, SystemExit):

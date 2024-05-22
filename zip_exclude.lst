@@ -5,3 +5,7 @@ logs/*
 zip_exclude.lst
 *.zip
 udi_interface*/*
+*.cert
+*.key
+*.pid
+*.log
