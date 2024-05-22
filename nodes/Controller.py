@@ -134,6 +134,9 @@ class Controller(Node):
         LOGGER.info('done')
 
     def handler_poll(self, polltype):
+        if self.token is False:
+            LOGGER.warning(f"Not able to poll yet, token={self.token}")
+            return False
         if polltype == 'longPoll':
             self.longPoll()
         elif polltype == 'shortPoll':
