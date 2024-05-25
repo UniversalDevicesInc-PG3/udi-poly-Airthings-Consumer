@@ -106,11 +106,18 @@ class Sensor(Node):
         self.query(force=False,authorize=False)
         LOGGER.info('exit')
 
+    def poll_device(self):
+        pd = int(self.getDriver('GV6'))
+        LOGGER.debug(f"poll_device:{pd}")
+        return True if pd == 1 else False
+    
     def query(self,force=True,authorize=True):
         LOGGER.info('enter')
         self.set_st(self.device['segment']['active'],force=force)
-        if int(self.getDriver('GV6')) == 0:
+        if not self.poll_device():
             LOGGER.debug(f'Polling is off for {self.name}')
+            self.set_seconds(-1)
+            return
         if authorize:
             # Check that we are authorized
             self.controller.authorize()
