@@ -45,6 +45,9 @@ This node has the following status
 - Active
   - driver: ST
   - The device is currently active
+- Poll Device
+  - driver: GV6
+  - Enable/Disable polling of sensor
 - Battery Level
   - driver: BATLVL
   - The battery level percentage
@@ -69,6 +72,9 @@ This node has the following status
 - Time
   - driver: GV2
   - The time of device measurment, epoch value which is not currently useful in the ISY except to watch it change
+- Seconds Since Update
+  - driver: GV5
+  - Number of seconds since the device reported.  This is based on the timestamp returned by the Airthings API in relation to the time on the local machine.
 - VOC
   - driver: GV4
   - The VOC measurement https://www.airthings.com/what-is-voc
@@ -97,6 +103,11 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.1.0: 05/24/2024
+  - Fix [Add ability to turn off polling for some device](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/21)
+  - Fix [Add IoX timestamp drive and/or second since update](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/20)
+  - Fix crash if airthings session is slow to start
+  - Switch to new PG versioning method
 - 1.0.2: 01/10/2023
   - Fix [Fatal error when printing error received](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/17)
 - 1.0.1: 12/12/2022
