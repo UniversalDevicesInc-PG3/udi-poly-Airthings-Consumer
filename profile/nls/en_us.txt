@@ -5,8 +5,9 @@ CMD-ctl-QUERY-NAME = Query
 CMD-ctl-QUERY_ALL-NAME = Query All
 ST-ctl-ST-NAME = NodeServer Status
 ST-ctl-GV1-NAME = Authorized
-ST-ctl-GV2-NAME = Sensors
+ST-ctl-GV2-NAME = Total Sensors
 ST-ctl-GV3-NAME = Server Status
+ST-ctl-GV4-NAME = Polling Sensors
 
 # Controller Status
 CST-0 = Disconnected

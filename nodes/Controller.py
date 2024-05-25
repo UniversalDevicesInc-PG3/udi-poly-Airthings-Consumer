@@ -22,6 +22,7 @@ class Controller(Node):
         self.cfg_longPoll = None
         self.cfg_shortPoll = None
         self.num_sensors = 0
+        self.num_sensors_poll = 0
         self.nkey_sp = 'shortPoll'
         self.queue_lock = Lock() # Lock for syncronizing acress threads
         self.n_queue = []
@@ -170,11 +171,15 @@ class Controller(Node):
         LOGGER.info('enter')
         # Make sure we are still authorized
         if self.authorize():
+            cnt = 0
             if self.discover_st is not True:
                 self.discover_st = self.discover()
             for node in self.poly.nodes():
                 if node.address != self.address:
                     node.shortPoll()
+                    if node.poll_device():
+                        cnt += 1
+            self.set_sensors_poll(cnt)
         LOGGER.info('exit')
 
     # *****************************************************************************
@@ -318,10 +323,10 @@ class Controller(Node):
         return st
 
     def check_short_poll(self):
-        rval = 30 * self.num_sensors
+        rval = 30 * self.num_sensors_poll
         if int(self.cfg_shortPoll) < rval:
             # This is a unique message
-            tmsg = f"Your shortPoll={self.cfg_shortPoll} is to low for {self.num_sensors} sensors, please change to at least {rval}"
+            tmsg = f"Your shortPoll={self.cfg_shortPoll} is to low for {self.num_sensors_poll} polled sensors, please change to at least {rval}"
             LOGGER.warning(tmsg)
             self.Notices[self.nkey_sp] = tmsg
         else:
@@ -330,9 +335,12 @@ class Controller(Node):
     def add_device(self,device):
         LOGGER.debug(f"start: {device}")
         if device['deviceType'] != "HUB":
-            if self.add_node(Sensor(self, device['id'], self.poly.getValidName(device['segment']['name']), self.units, device=device)):
-                self.sensors[device['id']] = Node
+            node = self.add_node(Sensor(self, device['id'], self.poly.getValidName(device['segment']['name']), self.units, device=device))
+            if node:
+                self.sensors[device['id']] = node
                 self.incr_sensors()
+                if node.poll_device(): 
+                    self.incr_sensors_poll()
         LOGGER.debug(f"done")
 
     def add_existing_tag_managers(self):
@@ -470,9 +478,14 @@ class Controller(Node):
         self.setDriver('GV2', val)
 
     def incr_sensors(self):
-        self.num_sensors += 1
-        self.setDriver('GV2', self.num_sensors)
+        self.set_sensors(self.num_sensors + 1)
 
+    def set_sensors_poll(self,val):
+        self.num_sensors_poll = val
+        self.setDriver('GV4', val)
+
+    def incr_sensors_poll(self):
+        self.set_sensors_poll(self.num_sensors_poll + 1)
 
     def set_server_st(self,val):
         self.setDriver('GV3', val)
@@ -495,8 +508,9 @@ class Controller(Node):
         'QUERY_ALL': query_all,
     }
     drivers = [
-        {'driver': 'ST',  'value': 1, 'uom': 25},   # connection status
-        {'driver': 'GV1', 'value': 0, 'uom': 2},    # authorized
-        {'driver': 'GV2', 'value': 0, 'uom': 56},   # sensors
-        {'driver': 'GV3', 'value': 0, 'uom': 25},   # server status
+        {'driver': 'ST',  'value': 1, 'uom': 25, "name": "NodeServer Online"},
+        {'driver': 'GV1', 'value': 0, 'uom': 2,  "name": "Authorized"},
+        {'driver': 'GV2', 'value': 0, 'uom': 56, "name": "Total Number of Sensors"},
+        {'driver': 'GV4', 'value': 0, 'uom': 56, "name": "Number of Polling Sensors"},
+        {'driver': 'GV3', 'value': 0, 'uom': 25, "name": "Airthings Server Status"},
     ]

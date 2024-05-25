@@ -6,6 +6,7 @@
             <st id="GV1" editor="bool" /> <!-- Authorized -->
             <st id="GV3" editor="I_SST" /> <!-- Server Status -->
             <st id="GV2" editor="I_INT" /> <!-- Sensors -->
+            <st id="GV4" editor="I_INT" /> <!-- Sensors Polling-->
 		</sts>
         <cmds>
             <sends>
