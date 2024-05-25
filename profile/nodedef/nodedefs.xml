@@ -20,18 +20,18 @@
         </cmds>
     </nodeDef>
 
-  <!-- Tag 12 F -->
   <nodeDef id="Sensor" nls="sensor">
     <editors/>
     <sts>
-      <st id="ST" editor="bool"/> <!-- Status, online? x -->
+      <st id="ST" editor="bool"/> <!-- Status, online? -->
+      <st id="GV6" editor="bool"/> <!-- Poll device -->
       <st id="BATLVL" editor="I_PCT"/> <!-- battery -->
       <st id="CO2LVL" editor="I_CO2"/> <!-- co2 -->
       <st id="CLIHUM" editor="I_HUM"/> <!-- humidity -->
       <st id="BARPRES" editor="I_MBAR"/> <!-- pressure -->
       <st id="GV1" editor="I_FLOAT"/> <!-- radon -->
       <st id="GV3" editor="I_INT"/> <!-- rssi -->
-      <st id="CLITEMP" editor="I_TEMP"/> <!-- temperature ? -->
+      <st id="CLITEMP" editor="I_TEMP"/> <!-- temperature -->
       <st id="GV4" editor="I_VOC"/> <!-- voc -->
       <st id="VOCLVL" editor="I_VOC_LVL"/> <!-- voc levels -->
       <st id="GV2" editor="I_TIME"/> <!-- time -->
@@ -41,6 +41,9 @@
       <sends/>
       <accepts>
         <cmd id="QUERY"/>
+        <cmd id="POLL">
+          <p id="" editor="bool" init="GV6" />
+        </cmd>
       </accepts>
     </cmds>
   </nodeDef>

@@ -80,7 +80,8 @@ class Sensor(Node):
             {'driver': 'GV3', 'value': 0, 'uom': 56}, # rssi
             {'driver': 'GV4', 'value': 0, 'uom': 56}, # voc
             {'driver': 'VOCLVL', 'value': 0, 'uom': 96}, # voc level name
-            {'driver': 'GV5', 'value': -1, 'uom': 56}, # voc
+            {'driver': 'GV5', 'value': -1, 'uom': 56}, # seconds
+            {'driver': 'GV6', 'value': 1, 'uom': 2}, # poll
         ]
         dv.append({'driver': 'BATLVL',  'value': 0, 'uom': 51})
         #dv.append({'driver': 'CLIHUM',  'value': 0, 'uom': 22})
@@ -108,6 +109,8 @@ class Sensor(Node):
     def query(self,force=True,authorize=True):
         LOGGER.info('enter')
         self.set_st(self.device['segment']['active'],force=force)
+        if int(self.getDriver('GV6')) == 0:
+            LOGGER.debug(f'Polling is off for {self.name}')
         if authorize:
             # Check that we are authorized
             self.controller.authorize()
@@ -203,6 +206,10 @@ class Sensor(Node):
         self.setDriver('GV4', myfloat(value,1),force=force)
         self.set_voc_level(value)
     
+    def set_poll(self,value,force=False):
+        LOGGER.debug('{0}'.format(value))
+        self.setDriver('GV6', int(value),force=force)
+    
     #96 = VOC Level
     #  1 - Clean
     #  2 - Slightly Polluted
@@ -221,8 +228,15 @@ class Sensor(Node):
         self.setDriver('VOCLVL',lvl,force=force)
 
     """
+    Command Functions
     """
+    def cmd_poll(self, command):
+        self.set_poll(int(command.get('value')))
 
+    """
+    commands
+    """
     commands = {
         'QUERY': query,
+        "POLL": cmd_poll,
     }

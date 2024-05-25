@@ -29,6 +29,5 @@ ST-sensor-GV2-NAME = Time
 ST-sensor-GV3-NAME = RSSI
 ST-sensor-GV4-NAME = VOC
 ST-sensor-GV5-NAME = Seconds Since Update
-
-
-
+ST-sensor-GV6-NAME = Poll Device
+CMD-sensor-POLL-NAME = Set Poll Device
