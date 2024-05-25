@@ -70,20 +70,20 @@ class Sensor(Node):
         # temp:   Curent temperature (17=F 4=C)
         temp_uom = 4 if self.units == "METRIC" else 17
         dv = [
-            {'driver': 'ST',      'value': 0, 'uom': 2},
-            {'driver': 'CLITEMP', 'value': 0, 'uom': temp_uom},
-            {'driver': 'CLIHUM', 'value': 0, 'uom': 22},
-            {'driver': 'CO2LVL', 'value': 0, 'uom': 54},
-            {'driver': 'BARPRES', 'value': 0, 'uom': 56},
-            {'driver': 'GV1', 'value': 0, 'uom': 56}, # radon
-            {'driver': 'GV2', 'value': 0, 'uom': 151}, # time
-            {'driver': 'GV3', 'value': 0, 'uom': 56}, # rssi
-            {'driver': 'GV4', 'value': 0, 'uom': 56}, # voc
-            {'driver': 'VOCLVL', 'value': 0, 'uom': 96}, # voc level name
-            {'driver': 'GV5', 'value': -1, 'uom': 56}, # seconds
-            {'driver': 'GV6', 'value': 1, 'uom': 2}, # poll
+            {'driver': 'ST',      'value':  0, 'uom': 2,   "name": "Status"},
+            {'driver': 'CLITEMP', 'value':  0, 'uom': temp_uom, "name": "Temperature"},
+            {'driver': 'CLIHUM',  'value':  0, 'uom': 22,  "name": "Humidity"},
+            {'driver': 'CO2LVL',  'value':  0, 'uom': 54,  "name": "CO2 Level"},
+            {'driver': 'BARPRES', 'value':  0, 'uom': 56,  "name": "Baremtric Pressure"},
+            {'driver': 'GV1',     'value':  0, 'uom': 56,  "name": "Radon"},
+            {'driver': 'GV2',     'value':  0, 'uom': 151, "name": "Timestamp"},
+            {'driver': 'GV3',     'value':  0, 'uom': 56,  "name": "RSSI"},
+            {'driver': 'GV4',     'value':  0, 'uom': 56,  "name": "VOC"},
+            {'driver': 'VOCLVL',  'value':  0, 'uom': 96,  "name": "VOC Level Name"},
+            {'driver': 'GV5',     'value': -1, 'uom': 56,  "name": "Seconds Since Seen"},
+            {'driver': 'GV6',     'value':  1, 'uom': 2,   "name": "Poll Sensor"},
         ]
-        dv.append({'driver': 'BATLVL',  'value': 0, 'uom': 51})
+        dv.append({'driver': 'BATLVL',  'value': 0, 'uom': 51,  "name": "Battery Level"})
         #dv.append({'driver': 'CLIHUM',  'value': 0, 'uom': 22})
         self.drivers = dv
         controller.poly.subscribe(controller.poly.START,             self.handler_start, address) 
