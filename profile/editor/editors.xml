@@ -37,4 +37,10 @@
 	<editor id="I_INT">
 		<range uom="56" min="-1000000" max="1000000" />
 	</editor>
+	<editor id="I_SEC">
+		<range uom="56" min="0" max="1000000" />
+	</editor>
+	<editor id="I_TIME">
+		<range uom="151" min="-1" max="9000000000" />
+	</editor>
 </editors>

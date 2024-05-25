@@ -28,5 +28,7 @@ ST-sensor-GV1-NAME = Radon
 ST-sensor-GV2-NAME = Time
 ST-sensor-GV3-NAME = RSSI
 ST-sensor-GV4-NAME = VOC
+ST-sensor-GV5-NAME = Seconds Since Update
+
 
 

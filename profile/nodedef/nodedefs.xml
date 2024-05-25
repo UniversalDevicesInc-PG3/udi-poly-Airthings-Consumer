@@ -32,9 +32,10 @@
       <st id="GV1" editor="I_FLOAT"/> <!-- radon -->
       <st id="GV3" editor="I_INT"/> <!-- rssi -->
       <st id="CLITEMP" editor="I_TEMP"/> <!-- temperature ? -->
-      <st id="GV2" editor="I_INT"/> <!-- time -->
       <st id="GV4" editor="I_VOC"/> <!-- voc -->
       <st id="VOCLVL" editor="I_VOC_LVL"/> <!-- voc levels -->
+      <st id="GV2" editor="I_TIME"/> <!-- time -->
+      <st id="GV5" editor="I_SEC"/> <!-- seconds sicne update -->
     </sts>
     <cmds>
       <sends/>

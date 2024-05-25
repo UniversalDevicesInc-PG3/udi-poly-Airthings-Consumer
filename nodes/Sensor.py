@@ -7,6 +7,7 @@ from udi_interface import Node,LOGGER
 import sys
 import time
 import re
+from datetime import datetime
 from node_functions import myfloat,CtoF
 
 DLEV = 0
@@ -75,10 +76,11 @@ class Sensor(Node):
             {'driver': 'CO2LVL', 'value': 0, 'uom': 54},
             {'driver': 'BARPRES', 'value': 0, 'uom': 56},
             {'driver': 'GV1', 'value': 0, 'uom': 56}, # radon
-            {'driver': 'GV2', 'value': 0, 'uom': 56}, # time
+            {'driver': 'GV2', 'value': 0, 'uom': 151}, # time
             {'driver': 'GV3', 'value': 0, 'uom': 56}, # rssi
             {'driver': 'GV4', 'value': 0, 'uom': 56}, # voc
             {'driver': 'VOCLVL', 'value': 0, 'uom': 96}, # voc level name
+            {'driver': 'GV5', 'value': -1, 'uom': 56}, # voc
         ]
         dv.append({'driver': 'BATLVL',  'value': 0, 'uom': 51})
         #dv.append({'driver': 'CLIHUM',  'value': 0, 'uom': 22})
@@ -187,7 +189,14 @@ class Sensor(Node):
 
     def set_time(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
-        self.setDriver('GV2', int(value),force=force)
+        self.setDriver('GV2', int(value),force=force,uom=151)
+        LOGGER.debug(f'now={datetime.now()} update={datetime.fromtimestamp(int(value))}')
+        delta = datetime.now() - datetime.fromtimestamp(int(value))
+        self.set_seconds(delta.total_seconds())
+
+    def set_seconds(self,value,force=False):
+        LOGGER.debug('{0}'.format(value))
+        self.setDriver('GV5', int(value),force=force)
 
     def set_voc(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
