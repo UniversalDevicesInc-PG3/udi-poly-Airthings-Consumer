@@ -103,6 +103,9 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.1.1: 05/25/2024
+  - Track Total Sensors, and Sensors actively polled.  Uses the later to calculate what the minimum polling time should be.
+  - Added driver names so they show up on the PG3 Nodes page.
 - 1.1.0: 05/24/2024
   - Fix [Add ability to turn off polling for some device](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/21)
   - Fix [Add IoX timestamp drive and/or second since update](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/20)
