@@ -238,7 +238,15 @@ class Sensor(Node):
     Command Functions
     """
     def cmd_poll(self, command):
-        self.set_poll(int(command.get('value')))
+        val = int(command.get('value'))
+        cp = self.poll_device()
+        self.set_poll(val)
+        if val == 0 and cp:
+            # Currently polling, but requesting to not poll
+            self.controller.decr_sensors_poll()
+        elif not cp:
+            # Not currently polling, but requesting to poll
+            self.controller.incr_sensors_poll()
 
     """
     commands

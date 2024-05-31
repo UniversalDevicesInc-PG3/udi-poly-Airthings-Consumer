@@ -11,7 +11,7 @@ from nodes import Sensor
 class Controller(Node):
 
     def __init__(self, poly, primary, address, name):
-        LOGGER.info('WirelessTag Controller: Initializing')
+        LOGGER.info('Airthings-C Controller: Initializing')
         super(Controller, self).__init__(poly, primary, address, name)
         # These start in threads cause they take a while
         self.ready = False
@@ -23,6 +23,7 @@ class Controller(Node):
         self.cfg_shortPoll = None
         self.num_sensors = 0
         self.num_sensors_poll = 0
+        self.in_query_all = False
         self.nkey_sp = 'shortPoll'
         self.queue_lock = Lock() # Lock for syncronizing acress threads
         self.n_queue = []
@@ -169,6 +170,10 @@ class Controller(Node):
 
     def _query_all(self):
         LOGGER.info('enter')
+        if self.in_query_all:
+            LOGGER.error("Previous query still running")
+            return False
+        self.in_query_all = True
         # Make sure we are still authorized
         if self.authorize():
             cnt = 0
@@ -180,6 +185,7 @@ class Controller(Node):
                     if node.poll_device():
                         cnt += 1
             self.set_sensors_poll(cnt)
+        self.in_query_all = False
         LOGGER.info('exit')
 
     # *****************************************************************************
@@ -476,6 +482,8 @@ class Controller(Node):
     def set_sensors(self,val):
         self.num_sensors = val
         self.setDriver('GV2', val)
+        if int(val) == 0:
+            self.set_sensors_poll(0)
 
     def incr_sensors(self):
         self.set_sensors(self.num_sensors + 1)
@@ -486,6 +494,9 @@ class Controller(Node):
 
     def incr_sensors_poll(self):
         self.set_sensors_poll(self.num_sensors_poll + 1)
+
+    def decr_sensors_poll(self):
+        self.set_sensors_poll(self.num_sensors_poll - 1)
 
     def set_server_st(self,val):
         self.setDriver('GV3', val)

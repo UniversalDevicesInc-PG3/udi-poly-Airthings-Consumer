@@ -42,6 +42,8 @@ This has the following status:
 
 This node has the following status
 
+##### Status
+
 - Active
   - driver: ST
   - The device is currently active
@@ -82,6 +84,11 @@ This node has the following status
   - driver: VOCLVL
   - The text description of the VOC
 
+##### Commands
+
+- Set Poll Device
+  - Enable or disable polling of this device
+
 ## Using the Nodeserver
 
 Following are examples have usages for this nodeserver.
@@ -103,6 +110,9 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.1.2: 05/31/2024
+  - Better tracking of polling device count
+  - Fix [Do not allow multiple concurrent queries](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/22)
 - 1.1.1: 05/25/2024
   - Track Total Sensors, and Sensors actively polled.  Uses the later to calculate what the minimum polling time should be.
   - Added driver names so they show up on the PG3 Nodes page.
