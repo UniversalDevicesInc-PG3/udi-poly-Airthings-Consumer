@@ -35,7 +35,7 @@ class Sensor(Node):
             #
             # An existing node,
             LOGGER.debug('Existing node...')
-            # We need to pull info from existing tags to know what they are.
+            # We need to pull info from existing sensors to know what they are.
             node_data = self.controller.poly.db_getNodeDrivers(address)
             LOGGER.debug(f"node_data={node_data}")
             dv = dict()
@@ -114,13 +114,16 @@ class Sensor(Node):
     def query(self,force=True,authorize=True):
         LOGGER.info('enter')
         self.set_st(self.device['segment']['active'],force=force)
+        if force:
+            self.set_poll(None,force=force)
         if not self.poll_device():
             LOGGER.debug(f'Polling is off for {self.name}')
             self.set_seconds(-1)
             return
         if authorize:
             # Check that we are authorized
-            self.controller.authorize()
+            if not self.controller.authorize():
+                return False
         # res={'code': 200, 'data': {'data': {'battery': 100, 'co2': 570.0, 'humidity': 43.0, 'pressure': 996.3, 'radonShortTermAvg': 10.0, 'rssi': -63, 'temp': 25.6, 'time': 1656884420, 'voc': 138.0, 'relayDeviceType': 'hub'}}}
         st = self.controller.api_get(f"devices/{self.serial}/latest-samples")
         if st is False or st is None:
@@ -211,10 +214,13 @@ class Sensor(Node):
     def set_voc(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
         self.setDriver('GV4', myfloat(value,1),force=force)
-        self.set_voc_level(value)
+        self.set_voc_level(value,force=force)
     
     def set_poll(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
+        if value is None:
+            value = self.getDriver('GV6')
+            LOGGER.debug('{0}'.format(value))
         self.setDriver('GV6', int(value),force=force)
     
     #96 = VOC Level

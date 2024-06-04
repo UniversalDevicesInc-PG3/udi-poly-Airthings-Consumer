@@ -110,6 +110,10 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.1.3: 06/04/2024
+  - Force pushing values to IoX on manual query
+  - Don't poll device if authorization fails
+  - If rate limit is exceeded, wait 5 minutes before polling again
 - 1.1.2: 05/31/2024
   - Better tracking of polling device count
   - Fix [Do not allow multiple concurrent queries](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/22)

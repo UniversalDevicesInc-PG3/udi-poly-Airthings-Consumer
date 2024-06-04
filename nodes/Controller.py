@@ -228,22 +228,22 @@ class Controller(Node):
             self.set_server_st(1)
             return res
         if 'error_code' in res['data']:
+            LOGGER.warning(f"{code} {res['data']['error_code']} {res['data']['error']} {res['data']['error_description']}")
             if res['data']['error_code'] == 1070:
                 self.set_server_st(res['data']['error_code'])
+                LOGGER.warning("Will wait 5 minutes to attempt another request")
+                self.api_get_wait_until = datetime. now() + timedelta(seconds=60 * 5)
+                self.api_get_wait_notified = False
             else:
                 LOGGER.error(f"Unknown error code {res['data']['error_code']} in {res['data']}")
                 self.set_server_st(0)
         else:
+            LOGGER.warning(f"Service returned code {code} {data['message']}")
             if code == 401:
                 self.set_server_st(code)
             else:
                 LOGGER.error(f"Unknown error code {code}")
                 self.set_server_st(0)
-        # We get thuis, don't try again for 5 minutes?
-        if code == 429 and res['data']['error'] == 'TOO_MANY_REQUESTS' and self.api_get_wait_until is False:
-            self.api_get_wait_until = datetime. now() + timedelta(seconds=60 * 5)
-            self.api_get_wait_notified = False
-        return res
 
     def authorize(self):
         LOGGER.debug("enter")
