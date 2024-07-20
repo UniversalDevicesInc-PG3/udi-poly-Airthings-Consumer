@@ -8,6 +8,11 @@ ST-ctl-GV1-NAME = Authorized
 ST-ctl-GV2-NAME = Total Sensors
 ST-ctl-GV3-NAME = Server Status
 ST-ctl-GV4-NAME = Polling Sensors
+ST-ctl-GV5-NAME = Auto Set Short Poll
+ST-ctl-GV6-NAME = Short Poll
+
+CMD-ctl-AUTO_SHORT_POLL-NAME = Auto Short Poll
+CMD-ctl-SHORT_POLL-NAME = Short Poll
 
 # Controller Status
 CST-0 = Disconnected

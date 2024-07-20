@@ -329,6 +329,7 @@ class Controller(Node):
         return st
 
     def check_short_poll(self):
+        self.set_short_poll(self.cfg_shortPoll)
         rval = 30 * self.num_sensors_poll
         if int(self.cfg_shortPoll) < rval:
             # This is a unique message
@@ -337,6 +338,13 @@ class Controller(Node):
             self.Notices[self.nkey_sp] = tmsg
         else:
             self.Notices.delete(self.nkey_sp)
+
+    def update_short_poll(self):
+        val = self.getDriver('GV5')
+        LOGGER.info(f'val={val}')
+        if (val is not None and val > 0):
+            rval = 30 * self.num_sensors_poll
+            self.set_short_poll(rval)            
 
     def add_device(self,device):
         LOGGER.debug(f"start: {device}")
@@ -491,15 +499,26 @@ class Controller(Node):
     def set_sensors_poll(self,val):
         self.num_sensors_poll = val
         self.setDriver('GV4', val)
+        self.update_short_poll()
 
     def incr_sensors_poll(self):
         self.set_sensors_poll(self.num_sensors_poll + 1)
+        self.update_short_poll()
 
     def decr_sensors_poll(self):
         self.set_sensors_poll(self.num_sensors_poll - 1)
+        self.update_short_poll()
 
     def set_server_st(self,val):
         self.setDriver('GV3', val)
+
+    def set_auto_short_poll(self,val):
+        self.setDriver('GV5', int(val))
+        self.update_short_poll()
+
+    def set_short_poll(self,val):
+        self.setDriver('GV6', int(val))
+        self.poly.setPoll(int(val),self.cfg_longPoll)
 
     """
     Command Functions
@@ -510,6 +529,16 @@ class Controller(Node):
         LOGGER.info(val)
         self.set_managers(val)
 
+    def cmd_set_auto_short_poll(self,command):
+        val = command.get('value')
+        LOGGER.info(val)
+        self.set_auto_short_poll(val)
+
+    def cmd_set_short_poll(self,command):
+        val = command.get('value')
+        LOGGER.info(val)
+        self.set_short_poll(val)
+
     """
     Node Definitions
     """
@@ -517,6 +546,8 @@ class Controller(Node):
     commands = {
         'QUERY': query,
         'QUERY_ALL': query_all,
+        'AUTO_SHORT_POLL': cmd_set_auto_short_poll,
+        'SHORT_POLL': cmd_set_short_poll,
     }
     drivers = [
         {'driver': 'ST',  'value': 1, 'uom': 25, "name": "NodeServer Online"},
@@ -524,4 +555,6 @@ class Controller(Node):
         {'driver': 'GV2', 'value': 0, 'uom': 56, "name": "Total Number of Sensors"},
         {'driver': 'GV4', 'value': 0, 'uom': 56, "name": "Number of Polling Sensors"},
         {'driver': 'GV3', 'value': 0, 'uom': 25, "name": "Airthings Server Status"},
+        {'driver': 'GV5', 'value': 1, 'uom': 2,  "name": "Auto Set Short Poll"},
+        {'driver': 'GV6', 'value': 0, 'uom': 56, "name": "Short Poll"},
     ]

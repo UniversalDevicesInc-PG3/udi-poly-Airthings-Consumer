@@ -110,6 +110,9 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.2: 07/20/2024
+  - [Add driver for short poll interval](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/23)
+  New Feature: The Controller has "Auto Set Short Poll" which will automatically set the short poll to the minimum value.  If disabled, you can manually set it with the driver "Short Poll" on the controller.
 - 1.1.3: 06/04/2024
   - Force pushing values to IoX on manual query
   - Don't poll device if authorization fails
