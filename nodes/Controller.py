@@ -339,13 +339,6 @@ class Controller(Node):
         else:
             self.Notices.delete(self.nkey_sp)
 
-    def update_short_poll(self):
-        val = self.getDriver('GV5')
-        LOGGER.info(f'val={val}')
-        if (val is not None and val > 0):
-            rval = 30 * self.num_sensors_poll
-            self.set_short_poll(rval)            
-
     def add_device(self,device):
         LOGGER.debug(f"start: {device}")
         if device['deviceType'] != "HUB":
@@ -512,13 +505,33 @@ class Controller(Node):
     def set_server_st(self,val):
         self.setDriver('GV3', val)
 
-    def set_auto_short_poll(self,val):
+    def set_auto_short_poll(self,val = None):
+        if val is None:
+            val = self.getDriver('GV5')
+            if val is None:
+                val = 1
+        val = int(val)
         self.setDriver('GV5', int(val))
         self.update_short_poll()
 
-    def set_short_poll(self,val):
-        self.setDriver('GV6', int(val))
-        self.poly.setPoll(int(val),self.cfg_longPoll)
+    def set_short_poll(self,val = None):
+        if val is None:
+            val = self.cfg_shortPoll
+        val = int(val)
+        self.setDriver('GV6', val)
+        self.poly.setPoll(val,self.cfg_longPoll)
+        return val
+
+    def update_short_poll(self):
+        val = self.getDriver('GV5')
+        if val is None:
+            val = 1
+        else:
+            val = int(val)
+        LOGGER.info(f'val={val}')
+        if (val is not None and val > 0):
+            rval = 30 * self.num_sensors_poll
+            self.set_short_poll(rval)            
 
     """
     Command Functions

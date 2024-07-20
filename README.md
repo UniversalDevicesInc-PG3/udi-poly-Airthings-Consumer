@@ -110,6 +110,8 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.2.1: 07/20/2024
+  - Try to set proper initial values on existing installs for Auto Short Poll = True
 - 1.2.0: 07/20/2024
   - [Add driver for short poll interval](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/23)
   New Feature: The Controller has "Auto Set Short Poll" which will automatically set the short poll to the minimum value.  If disabled, you can manually set it with the driver "Short Poll" on the controller.
