@@ -110,6 +110,8 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.2.2: 07/23/2024
+  - Fix crash after Airthings server error
 - 1.2.1: 07/20/2024
   - Try to set proper initial values on existing installs for Auto Short Poll = True
 - 1.2.0: 07/20/2024
