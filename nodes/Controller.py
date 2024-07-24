@@ -515,23 +515,26 @@ class Controller(Node):
             if val is None:
                 val = 1
         val = int(val)
+        LOGGER.debug(f'Setting GV5={val}')
         self.setDriver('GV5', int(val))
-        self.update_short_poll()
+        self.update_short_poll(val)
 
     def set_short_poll(self,val = None):
         if val is None:
             val = self.cfg_shortPoll
         val = int(val)
         self.setDriver('GV6', val)
+        LOGGER.info(f'setPoll({val},{self.cfg_longPoll})')
         self.poly.setPoll(val,self.cfg_longPoll)
         return val
 
-    def update_short_poll(self):
-        val = self.getDriver('GV5')
+    def update_short_poll(self, val = None):
         if val is None:
-            val = 1
-        else:
-            val = int(val)
+            val = self.getDriver('GV5')
+            if val is None:
+                val = 1
+            else:
+                val = int(val)
         LOGGER.info(f'val={val}')
         if (val is not None and val > 0):
             rval = 30 * self.num_sensors_poll
