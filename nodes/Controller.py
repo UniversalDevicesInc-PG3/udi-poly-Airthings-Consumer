@@ -575,6 +575,6 @@ class Controller(Node):
         {'driver': 'GV2', 'value': 0, 'uom': 56, "name": "Total Number of Sensors"},
         {'driver': 'GV4', 'value': 0, 'uom': 56, "name": "Number of Polling Sensors"},
         {'driver': 'GV3', 'value': 0, 'uom': 25, "name": "Airthings Server Status"},
-        {'driver': 'GV5', 'value': 1, 'uom': 2,  "name": "Auto Set Short Poll"},
+        {'driver': 'GV5', 'value': 0, 'uom': 2,  "name": "Auto Set Short Poll"},
         {'driver': 'GV6', 'value': 0, 'uom': 56, "name": "Short Poll"},
     ]
