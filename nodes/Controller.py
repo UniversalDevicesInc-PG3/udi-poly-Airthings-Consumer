@@ -524,6 +524,9 @@ class Controller(Node):
             val = self.cfg_shortPoll
         val = int(val)
         self.setDriver('GV6', val)
+        # Increase longPoll if less than shortPoll
+        if val > int(self.cfg_longPoll):
+            self.cfg_longPoll = val
         LOGGER.info(f'setPoll({val},{self.cfg_longPoll})')
         self.poly.setPoll(val,self.cfg_longPoll)
         return val
