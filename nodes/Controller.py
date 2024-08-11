@@ -545,7 +545,7 @@ class Controller(Node):
                 val = int(val)
         LOGGER.info(f'val={val}')
         if (val is not None and val > 0):
-            rval = 30 * self.num_sensors_poll
+            rval = 33 * self.num_sensors_poll
             self.set_short_poll(rval)            
 
     """
