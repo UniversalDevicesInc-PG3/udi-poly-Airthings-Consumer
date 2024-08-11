@@ -108,6 +108,7 @@ class Controller(Node):
         self.hb = 0
         self.heartbeat()
         LOGGER.info(f"Started Airthings-Consumer NodeServer {self.poly.serverdata['version']}")
+        self.db_node = self.poly.getNodesFromDb(self.address)
         cnt = 10
         while (self.handler_params_st is None or self.handler_config_done_st is None
             or self.handler_nsdata_st is None or self.handler_data_st is None) and cnt > 0:
@@ -120,6 +121,7 @@ class Controller(Node):
             cfgdoc = markdown2.markdown_path(configurationHelp)
             self.poly.setCustomParamsDoc(cfgdoc)
         self.poly.updateProfile()
+        self.set_auto_short_poll()
         self.ready = True
         LOGGER.info('done')
 
@@ -514,11 +516,20 @@ class Controller(Node):
     def set_server_st(self,val):
         self.setDriver('GV3', val)
 
+    def get_db_node_driver_value(self,driver):
+        if self.db_node is None:
+            return None
+        drv = next((item for item in self.db_node if item["driver"] == driver), False)
+        if drv is False:
+            return None
+        return drv['value']
+
     def set_auto_short_poll(self,val = None):
         if val is None:
-            val = self.getDriver('GV5')
+            # Use previously stored value
+            val = self.get_db_node_driver_value('GV5')
             if val is None:
-                val = 1
+                return None
         val = int(val)
         LOGGER.debug(f'Setting GV5={val}')
         self.setDriver('GV5', int(val))
@@ -526,7 +537,11 @@ class Controller(Node):
 
     def set_short_poll(self,val = None):
         if val is None:
-            val = self.cfg_shortPoll
+            # Use previously stored value
+            val = self.get_db_node_driver_value('GV6')
+            if val is None:
+                # Use what is defined in PG3 UI
+                val = self.cfg_shortPoll
         val = int(val)
         self.setDriver('GV6', val)
         # Increase longPoll if less than shortPoll

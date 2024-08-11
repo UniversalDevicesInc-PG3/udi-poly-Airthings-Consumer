@@ -110,6 +110,8 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.2.4: 08/11/2024
+  - Restore "Auto Short Poll" and "Short Poll" values as saved in PG3 DB
 - 1.2.3: 07/29/2024
   - Increase longPoll if less than shortPoll
 - 1.2.2: 07/23/2024

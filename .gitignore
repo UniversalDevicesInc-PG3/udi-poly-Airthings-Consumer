@@ -75,3 +75,6 @@ profile.zip
 .DS_Store
 *.sublime-*
 *.zip
+*.cert
+*.key
+*.pid
