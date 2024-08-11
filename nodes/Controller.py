@@ -37,6 +37,7 @@ class Controller(Node):
         poly.subscribe(poly.POLL,              self.handler_poll)
         poly.subscribe(poly.DISCOVER,          self.discover)
         poly.subscribe(poly.STOP,              self.handler_stop)
+        poly.subscribe(poly.NSINFO,            self.handler_nsinfo)
         poly.subscribe(poly.CUSTOMPARAMS,      self.handler_params)
         poly.subscribe(poly.CUSTOMDATA,        self.handler_data)
         #poly.subscribe(poly.CUSTOMTYPEDPARAMS, self.handler_typed_params)
@@ -128,6 +129,10 @@ class Controller(Node):
         self.cfg_shortPoll = int(data['shortPoll'])
         self.check_short_poll()
         self.handler_config_st = True
+        LOGGER.info('done')
+
+    def handler_nsinfo(self,data):
+        LOGGER.info(f'enter data={data}')
         LOGGER.info('done')
 
     def handler_config_done(self):
