@@ -121,6 +121,7 @@ class Controller(Node):
             cfgdoc = markdown2.markdown_path(configurationHelp)
             self.poly.setCustomParamsDoc(cfgdoc)
         self.poly.updateProfile()
+        self.set_short_poll()
         self.set_auto_short_poll()
         self.ready = True
         LOGGER.info('done')
