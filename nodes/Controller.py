@@ -130,7 +130,6 @@ class Controller(Node):
         LOGGER.info(f'enter data={data}')
         self.cfg_longPoll = int(data['longPoll'])
         self.cfg_shortPoll = int(data['shortPoll'])
-        self.check_short_poll()
         self.handler_config_st = True
         LOGGER.info('done')
 
@@ -154,6 +153,8 @@ class Controller(Node):
 
     def shortPoll(self):
         LOGGER.info('enter')
+        # TODO: This should be in a handler, but none are called when it's changed.
+        self.check_short_poll()
         self._query_all()
         LOGGER.info('exit')
 
@@ -341,8 +342,7 @@ class Controller(Node):
         return st
 
     def check_short_poll(self):
-        self.set_short_poll(self.cfg_shortPoll)
-        rval = 30 * self.num_sensors_poll
+        rval = 33 * self.num_sensors_poll
         if int(self.cfg_shortPoll) < rval:
             # This is a unique message
             tmsg = f"Your shortPoll={self.cfg_shortPoll} is to low for {self.num_sensors_poll} polled sensors, please change to at least {rval}"
@@ -550,6 +550,7 @@ class Controller(Node):
             self.cfg_longPoll = val
         LOGGER.info(f'setPoll({val},{self.cfg_longPoll})')
         self.poly.setPoll(val,self.cfg_longPoll)
+        self.check_short_poll()
         return val
 
     def update_short_poll(self, val = None):
