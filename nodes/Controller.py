@@ -342,6 +342,7 @@ class Controller(Node):
         return st
 
     def check_short_poll(self):
+        LOGGER.debug(f"start: {self.cfg_shortPoll}")
         rval = 33 * self.num_sensors_poll
         if int(self.cfg_shortPoll) < rval:
             # This is a unique message
@@ -350,6 +351,7 @@ class Controller(Node):
             self.Notices[self.nkey_sp] = tmsg
         else:
             self.Notices.delete(self.nkey_sp)
+        LOGGER.debug(f"done: {self.cfg_shortPoll}")
 
     def add_device(self,device):
         LOGGER.debug(f"start: {device}")
@@ -544,6 +546,8 @@ class Controller(Node):
                 # Use what is defined in PG3 UI
                 val = self.cfg_shortPoll
         val = int(val)
+        # This can go away if there ever is a handler called when poll numbers cbange
+        self.cfg_shortPoll = val
         self.setDriver('GV6', val)
         # Increase longPoll if less than shortPoll
         if val > int(self.cfg_longPoll):
