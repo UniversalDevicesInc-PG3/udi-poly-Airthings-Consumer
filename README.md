@@ -110,6 +110,8 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.2.7: 08/15/2024
+  - Fix "wait for 5 minutes" not waiting after INVALID_REQUEST_CLIENTS_LIMIT_EXCEEDED 
 - 1.2.6: 08/14/2024
   - Fix issue with short poll to small error not being cleared
 - 1.2.5: 08/13/2024

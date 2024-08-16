@@ -210,13 +210,13 @@ class Controller(Node):
         if not self.authorized:
             LOGGER.error("Not Authorized")
         if self.api_get_wait_until is not False:
-            if self.api_get_wait_until > datetime.now():
+            if datetime.now() < self.api_get_wait_until:
                 # Only notify once per wait session
                 if not self.api_get_wait_notified:
                     LOGGER.warning(f"API Rate limit exceeded, waiting until {self.api_get_wait_until} to query the Airthings service again.")
                     self.api_get_wait_notified = True
                 return None
-            LOGGER.warning("API Rate limit pause is over, trying again...")
+            LOGGER.warning(f"API Rate limit pause is over, trying again now={datetime.now()} < {self.api_get_wait_until}...")
             self.api_get_wait_until = False
         res = self.session.get(
             path,params,
@@ -241,8 +241,8 @@ class Controller(Node):
                 LOGGER.warning(f"{code} {res['data']['error_code']} {res['data']['error']} {res['data']['error_description']}")
                 if res['data']['error_code'] == 1070:
                     self.set_server_st(res['data']['error_code'])
-                    LOGGER.warning("Will wait 5 minutes to attempt another request")
                     self.api_get_wait_until = datetime. now() + timedelta(seconds=60 * 5)
+                    LOGGER.warning(f"Will wait 5 minutes to attempt another request at {self.api_get_wait_until}")
                     self.api_get_wait_notified = False
                 else:
                     LOGGER.error(f"Unknown error code {res['data']['error_code']} in {res['data']}")
@@ -546,6 +546,8 @@ class Controller(Node):
                 # Use what is defined in PG3 UI
                 val = self.cfg_shortPoll
         val = int(val)
+        if val <= 0:
+            return False
         # This can go away if there ever is a handler called when poll numbers cbange
         self.cfg_shortPoll = val
         self.setDriver('GV6', val)
@@ -565,7 +567,7 @@ class Controller(Node):
             else:
                 val = int(val)
         LOGGER.info(f'val={val}')
-        if (val is not None and val > 0):
+        if (val is not None and val > 0 and self.num_sensors_poll > 0):
             rval = 33 * self.num_sensors_poll
             self.set_short_poll(rval)            
 
