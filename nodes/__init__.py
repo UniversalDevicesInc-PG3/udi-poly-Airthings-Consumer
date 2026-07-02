@@ -1,7 +1,7 @@
 
 """ Node classes used by the Wireless Sensor Tags Node Server. """
 
-VERSION = "1.3.0"
+VERSION = "1.3.1"
 
 from .Sensor      import Sensor
 from .Controller  import Controller

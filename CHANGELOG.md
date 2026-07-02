@@ -7,6 +7,12 @@ and versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-06-28
+
+### Fixed
+
+- **Startup notices:** Custom-param notices (e.g. missing `client_id`) no longer flash and disappear on initial node-server startup. Removed `Notices.clear()` from startup, unified on `poly.Notices`, and re-sync notices after startup completes.
+
 ## [1.3.0] - 2026-06-28
 
 ### Added

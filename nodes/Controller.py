@@ -27,10 +27,9 @@ class Controller(Node):
         self.nkey_sp = 'shortPoll'
         self.queue_lock = Lock() # Lock for syncronizing acress threads
         self.n_queue = []
-        self.Notices         = Custom(poly, 'notices')
+        self.Notices         = poly.Notices
         self.Data            = Custom(poly, 'customdata')
         self.Params          = Custom(poly, 'customparams')
-        self.Notices         = Custom(poly, 'notices')
         #self.TypedParameters = Custom(poly, 'customtypedparams')
         #self.TypedData       = Custom(poly, 'customtypeddata')
         poly.subscribe(poly.START,             self.handler_start, address)
@@ -98,12 +97,12 @@ class Controller(Node):
         self.authorize()
         # if initial discover failed, try again on next poll
         self.discover_st = self.discover()
+        self.sync_param_notices()
         self.first_run = False
         LOGGER.debug("done")
 
     def handler_start(self):
         LOGGER.info('enter')
-        self.poly.Notices.clear()
         # Start a heartbeat right away
         self.hb = 0
         self.heartbeat()
@@ -123,8 +122,45 @@ class Controller(Node):
         self.poly.updateProfile()
         self.set_short_poll()
         self.set_auto_short_poll()
+        self.sync_param_notices()
         self.ready = True
         LOGGER.info('done')
+
+    def sync_param_notices(self):
+        """Publish or clear custom-param notices without re-running discover."""
+        params = {
+            'units': 'US',
+            'client_id': '',
+            'client_secret': "",
+            'change_node_names': "false"
+        }
+        data = dict(self.Params) if len(self.Params) else None
+        st = True
+        if data is None:
+            for param in params:
+                if param != 'units' and param != 'change_node_names':
+                    msg = f'Please define {param}'
+                    LOGGER.error(msg)
+                    self.Notices[param] = msg
+                    st = False
+            return st
+        for param in params:
+            if data.get(param) == "" or (data.get(param) == params[param] and param != 'units' and param != "change_node_names"):
+                msg = f'Please define {param}'
+                LOGGER.error(msg)
+                self.Notices[param] = msg
+                st = False
+            else:
+                self.Notices.delete(param)
+        units = str(data.get('units', 'US')).upper()
+        if units == "US" or units == "METRIC":
+            self.Notices.delete('unitsv')
+        else:
+            msg = f"Units must be 'US' or 'METRIC', assuming 'US'"
+            LOGGER.error(msg)
+            self.Notices['unitsv'] = msg
+            st = False
+        return st
 
     def handler_config(self,data):
         LOGGER.info(f'enter data={data}')
@@ -272,13 +308,13 @@ class Controller(Node):
             LOGGER.debug(f'Need to re-authorize...')
         st = True
         self.Notices.delete('client_id')
-        if self.client_id is None:
+        if not self.client_id:
             msg = f"Can not authorize, client_id={self.client_id}"
             LOGGER.error(msg)
             self.Notices['client_id'] = msg
             st = False
         self.Notices.delete('client_secret')
-        if self.client_secret is None:
+        if not self.client_secret:
             msg = f"Can not authorize, client_secret={self.client_secret}"
             LOGGER.error(msg)
             self.Notices['client_secret'] = msg
@@ -299,7 +335,7 @@ class Controller(Node):
             self.token = st['data']['access_token']
             self.token_type = st['data']['token_type']
             self.token_expires = st['data']['expires_in']
-            self.token_expires_dt = datetime. now() + timedelta(seconds=self.token_expires)
+            self.token_expires_dt = datetime.now() + timedelta(seconds=self.token_expires)
         LOGGER.debug("done")
         return True
 
@@ -439,8 +475,6 @@ class Controller(Node):
            self.Params.load(data)
 
         # Assume we are good unless something bad is found
-        st = True
-
         # Make sure all the params exist.
         for param in params:
             if data is None or not param in data:
@@ -450,26 +484,11 @@ class Controller(Node):
                 return
 
         # Make sure they all have a value that is not the default
-        for param in params:
-            if data[param] == "" or (data[param] == params[param] and param != 'units' and param != "change_node_names"):
-                msg = f'Please define {param}'
-                LOGGER.error(msg)
-                self.Notices[param] = msg
-                st = False
-            else:
-                self.Notices.delete(param)
-
         self.client_id     = self.Params['client_id']
         self.client_secret = self.Params['client_secret']
         self.units = self.Params['units'].upper()
-        if self.units == "US" or self.units == "METRIC":
-            self.Notices.delete('unitsv')
-        else:
-            msg = f"Units must be 'US' or 'METRIC', assuming 'US'"
-            LOGGER.error(msg)
-            self.Notices['unitsv'] = msg
         self.change_node_names = self.Params['change_node_names']
-        self.handler_params_st = st
+        self.handler_params_st = self.sync_param_notices()
         if not self.first_run:
             self.discover()
         LOGGER.debug(f'exit: first_run={self.first_run} st={self.handler_params_st}')
