@@ -190,6 +190,9 @@ class Controller(Node):
                 self.discover_st = self.discover()
             for node in self.poly.nodes():
                 if node.address != self.address:
+                    if self.api_get_wait_until is not False and datetime.now() < self.api_get_wait_until:
+                        LOGGER.warning("Skipping remaining sensor polls due to API rate limit")
+                        break
                     node.shortPoll()
                     if node.poll_device():
                         cnt += 1
@@ -241,7 +244,7 @@ class Controller(Node):
                 LOGGER.warning(f"{code} {res['data']['error_code']} {res['data']['error']} {res['data']['error_description']}")
                 if res['data']['error_code'] == 1070:
                     self.set_server_st(res['data']['error_code'])
-                    self.api_get_wait_until = datetime. now() + timedelta(seconds=60 * 5)
+                    self.api_get_wait_until = datetime.now() + timedelta(seconds=60 * 5)
                     LOGGER.warning(f"Will wait 5 minutes to attempt another request at {self.api_get_wait_until}")
                     self.api_get_wait_notified = False
                 else:

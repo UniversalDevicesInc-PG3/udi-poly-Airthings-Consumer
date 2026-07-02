@@ -45,6 +45,10 @@
       <st id="VOCLVL" editor="I_VOC_LVL"/> <!-- voc levels -->
       <st id="GV2" editor="I_TIME"/> <!-- time -->
       <st id="GV5" editor="I_SEC"/> <!-- seconds since update -->
+      <st id="GV7" editor="I_FLOAT"/> <!-- pm1 -->
+      <st id="GV8" editor="I_FLOAT"/> <!-- pm25 -->
+      <st id="GV9" editor="I_FLOAT"/> <!-- pm10 -->
+      <st id="GV10" editor="I_FLOAT"/> <!-- mold risk -->
     </sts>
     <cmds>
       <sends/>

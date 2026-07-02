@@ -83,6 +83,18 @@ This node has the following status
 - VOC Level
   - driver: VOCLVL
   - The text description of the VOC
+- PM1
+  - driver: GV7
+  - Particulate matter less than 1 µm (µg/m³)
+- PM2.5
+  - driver: GV8
+  - Particulate matter less than 2.5 µm (µg/m³)
+- PM10
+  - driver: GV9
+  - Particulate matter less than 10 µm (µg/m³)
+- Mold Risk
+  - driver: GV10
+  - Mold risk index from Airthings (0-10)
 
 ##### Commands
 
@@ -110,6 +122,10 @@ and of course if the notification is triggered by a program from a change in the
 https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues
 
 ## Release Notes
+- 1.3.0: 06/28/2026
+  - Fix [Add PM measurements](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/24) PM1, PM2.5, and PM10 drivers (µg/m³)
+  - Fix [Add support for mold](https://github.com/UniversalDevicesInc-PG3/udi-poly-Airthings-Consumer/issues/8) mold risk index driver (0-10)
+  - Skip remaining sensor polls when API rate limit is active
 - 1.2.7: 08/15/2024
   - Fix "wait for 5 minutes" not waiting after INVALID_REQUEST_CLIENTS_LIMIT_EXCEEDED 
 - 1.2.6: 08/14/2024

@@ -9,3 +9,8 @@ udi_interface*/*
 *.key
 *.pid
 *.log
+.git/*
+.gitignore
+.venv/*
+env/*
+*/.gitignore

@@ -82,6 +82,10 @@ class Sensor(Node):
             {'driver': 'VOCLVL',  'value':  0, 'uom': 96,  "name": "VOC Level Name"},
             {'driver': 'GV5',     'value': -1, 'uom': 56,  "name": "Seconds Since Seen"},
             {'driver': 'GV6',     'value':  1, 'uom': 2,   "name": "Poll Sensor"},
+            {'driver': 'GV7',     'value':  0, 'uom': 56,  "name": "PM1"},
+            {'driver': 'GV8',     'value':  0, 'uom': 56,  "name": "PM2.5"},
+            {'driver': 'GV9',     'value':  0, 'uom': 56,  "name": "PM10"},
+            {'driver': 'GV10',    'value':  0, 'uom': 56,  "name": "Mold Risk"},
         ]
         dv.append({'driver': 'BATLVL',  'value': 0, 'uom': 51,  "name": "Battery Level"})
         #dv.append({'driver': 'CLIHUM',  'value': 0, 'uom': 22})
@@ -131,28 +135,39 @@ class Sensor(Node):
         if st['code'] == 200:
             data = st['data']['data']
             for param in data:
+                value = data[param]
+                if value is None:
+                    continue
                 if param == 'battery':
-                    self.set_battery(data[param],force=force)
+                    self.set_battery(value,force=force)
                 elif param == 'co2':
-                    self.set_co2(data[param],force=force)
+                    self.set_co2(value,force=force)
                 elif param == 'humidity':
-                    self.set_hum(data[param],force=force)
+                    self.set_hum(value,force=force)
                 elif param == 'pressure':
-                    self.set_pressure(data[param],force=force)
+                    self.set_pressure(value,force=force)
                 elif param == 'radonShortTermAvg':
-                    self.set_radon(data[param],force=force)
+                    self.set_radon(value,force=force)
                 elif param == 'relayDeviceType':
                     pass
                 elif param == 'rssi':
-                    self.set_rssi(data[param],force=force)
+                    self.set_rssi(value,force=force)
                 elif param == 'temp':
-                    self.set_temp(data[param],force=force)
+                    self.set_temp(value,force=force)
                 elif param == 'time':
-                    self.set_time(data[param],force=force)
+                    self.set_time(value,force=force)
                 elif param == 'voc':
-                    self.set_voc(data[param],force=force)
+                    self.set_voc(value,force=force)
+                elif param == 'pm1':
+                    self.set_pm1(value,force=force)
+                elif param == 'pm25':
+                    self.set_pm25(value,force=force)
+                elif param == 'pm10':
+                    self.set_pm10(value,force=force)
+                elif param == 'mold':
+                    self.set_mold(value,force=force)
                 else:
-                    LOGGER.warning(f"Unknown param {param}={data[param]}")
+                    LOGGER.warning(f"Unknown param {param}={value}")
         LOGGER.info('exit')
 
     """
@@ -215,6 +230,23 @@ class Sensor(Node):
         LOGGER.debug('{0}'.format(value))
         self.setDriver('GV4', myfloat(value,1),force=force)
         self.set_voc_level(value,force=force)
+
+    def set_pm1(self,value,force=False):
+        LOGGER.debug('{0}'.format(value))
+        self.setDriver('GV7', myfloat(value,1),force=force)
+
+    def set_pm25(self,value,force=False):
+        LOGGER.debug('{0}'.format(value))
+        self.setDriver('GV8', myfloat(value,1),force=force)
+
+    def set_pm10(self,value,force=False):
+        LOGGER.debug('{0}'.format(value))
+        self.setDriver('GV9', myfloat(value,1),force=force)
+
+    # Airthings mold risk index 0-10
+    def set_mold(self,value,force=False):
+        LOGGER.debug('{0}'.format(value))
+        self.setDriver('GV10', myfloat(value,1),force=force)
     
     def set_poll(self,value,force=False):
         LOGGER.debug('{0}'.format(value))
