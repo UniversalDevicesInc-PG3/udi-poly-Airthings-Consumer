@@ -69,25 +69,52 @@ class Controller(Node):
     until it is fully created before we try to use it.
     '''
     def node_queue(self, data):
-        self.n_queue.append(data['address'])
-        # Now that node is done, do what is necessary
-        if (data['address'] == self.address):
+        address = data.get('address') if isinstance(data, dict) else None
+        if not address:
+            # eisy-ui validation errors come back without an address, so
+            # ADDNODEDONE is never published and wait_for_node_done times out.
+            LOGGER.error(f"Node add finished without an address: {data}")
+            return
+        # Controller completion starts discover. Do not leave that address in
+        # the sensor queue — the next add would treat it as its own ack.
+        if address == self.address:
             self.add_node_done()
+            return
+        with self.queue_lock:
+            self.n_queue.append(address)
 
-    def wait_for_node_done(self):
-        while len(self.n_queue) == 0:
+    def wait_for_node_done(self, address, timeout=20):
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            with self.queue_lock:
+                if address in self.n_queue:
+                    self.n_queue.remove(address)
+                    return True
             time.sleep(0.1)
-        self.n_queue.pop()
+        return False
+
+    def _as_bool(self, val):
+        """Custom params store 'true'/'false' strings. eisy-ui addnode requires a real bool."""
+        if isinstance(val, bool):
+            return val
+        return str(val).strip().lower() in ('1', 'true', 'yes', 'on')
 
     def add_node(self,node):
         # See if we need to check for node name changes where ELK is the source
         address = node.address
-        LOGGER.debug(f"Adding: {node.name}")
-        self.poly.addNode(node, rename=self.change_node_names)
-        self.wait_for_node_done()
+        rename = self._as_bool(self.change_node_names)
+        LOGGER.debug(f"Adding: {node.name} rename={rename}")
+        self.poly.addNode(node, rename=rename)
+        if not self.wait_for_node_done(address):
+            LOGGER.error(
+                f"Timed out waiting for {node.name} ({address}) to be added. "
+                "eisy-ui rejects addnode when rename is the string 'true' or 'false'."
+            )
+            return None
         gnode = self.poly.getNode(address)
         if gnode is None:
             LOGGER.error('Failed to add node address')
+            return None
         return node
 
     def add_node_done(self):
@@ -219,21 +246,23 @@ class Controller(Node):
             LOGGER.error("Previous query still running")
             return False
         self.in_query_all = True
-        # Make sure we are still authorized
-        if self.authorize():
-            cnt = 0
-            if self.discover_st is not True:
-                self.discover_st = self.discover()
-            for node in self.poly.nodes():
-                if node.address != self.address:
-                    if self.api_get_wait_until is not False and datetime.now() < self.api_get_wait_until:
-                        LOGGER.warning("Skipping remaining sensor polls due to API rate limit")
-                        break
-                    node.shortPoll()
-                    if node.poll_device():
-                        cnt += 1
-            self.set_sensors_poll(cnt)
-        self.in_query_all = False
+        try:
+            # Make sure we are still authorized
+            if self.authorize():
+                cnt = 0
+                if self.discover_st is not True:
+                    self.discover_st = self.discover()
+                for node in self.poly.nodes():
+                    if node.address != self.address:
+                        if self.api_get_wait_until is not False and datetime.now() < self.api_get_wait_until:
+                            LOGGER.warning("Skipping remaining sensor polls due to API rate limit")
+                            break
+                        node.shortPoll()
+                        if node.poll_device():
+                            cnt += 1
+                self.set_sensors_poll(cnt)
+        finally:
+            self.in_query_all = False
         LOGGER.info('exit')
 
     # *****************************************************************************
@@ -371,7 +400,10 @@ class Controller(Node):
             else:
                 st = True
                 for device in devices:
-                    self.add_device(device)
+                    if not self.add_device(device):
+                        st = False
+                if not st:
+                    msg = "One or more sensors could not be added. They will be retried on the next poll."
                 self.check_short_poll()
         else:
             msg = "Can't discover, not authorized, will try again on next poll..."
@@ -394,14 +426,19 @@ class Controller(Node):
 
     def add_device(self,device):
         LOGGER.debug(f"start: {device}")
-        if device['deviceType'] != "HUB":
-            node = self.add_node(Sensor(self, device['id'], self.poly.getValidName(device['segment']['name']), self.units, device=device))
-            if node:
-                self.sensors[device['id']] = node
-                self.incr_sensors()
-                if node.poll_device(): 
-                    self.incr_sensors_poll()
-        LOGGER.debug(f"done")
+        if device['deviceType'] == "HUB":
+            LOGGER.debug("done")
+            return True
+        node = self.add_node(Sensor(self, device['id'], self.poly.getValidName(device['segment']['name']), self.units, device=device))
+        if not node:
+            LOGGER.error(f"Failed to add {device.get('segment', {}).get('name', device.get('id'))}")
+            return False
+        self.sensors[device['id']] = node
+        self.incr_sensors()
+        if node.poll_device():
+            self.incr_sensors_poll()
+        LOGGER.debug("done")
+        return True
 
     def add_existing_tag_managers(self):
         """
@@ -487,7 +524,7 @@ class Controller(Node):
         self.client_id     = self.Params['client_id']
         self.client_secret = self.Params['client_secret']
         self.units = self.Params['units'].upper()
-        self.change_node_names = self.Params['change_node_names']
+        self.change_node_names = self._as_bool(self.Params['change_node_names'])
         self.handler_params_st = self.sync_param_notices()
         if not self.first_run:
             self.discover()

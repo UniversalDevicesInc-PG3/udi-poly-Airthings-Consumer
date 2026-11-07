@@ -24,6 +24,8 @@ This supports consumer devices from <a href="https://www.airthings.com/">Airthin
 
 ### General notes
 
+**Change node names** (`true` or `false`) still controls whether sensor names follow the Airthings app. Current builds send that choice in the form eisy-ui accepts. On 1.3.1, eisy-ui rejected the sensor add, discovery never finished, and readings stopped; the same slot on PG3 kept working. See [CHANGELOG.md](CHANGELOG.md).
+
 ### Nodes
 
 #### Controller

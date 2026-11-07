@@ -7,6 +7,12 @@ and versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-11-07
+
+### Fixed
+
+- **eisy-ui sensor adds:** `change_node_names` is stored as the string `"true"` / `"false"`. eisy-ui rejects `addnode` unless `rename` is a real boolean (`Validation failed: 0.rename: expected boolean, received string`). Discovery then waited forever for a node-add that never completed, so later polls logged `Previous query still running` and sensors stopped updating. The flag is now passed as a boolean, and a failed add times out instead of blocking every poll.
+
 ## [1.3.1] - 2026-06-28
 
 ### Fixed
